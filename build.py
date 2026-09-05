@@ -129,10 +129,15 @@ TOWN_LINKS = [('dog-boarding-barrie', 'Barrie'), ('dog-boarding-innisfil', 'Inni
 # ---------------------------------------------------------------- blocks
 def hero(eyebrow, h1, lede, lp, video=False, photo=None, focus='center', short=False, price=None, sub=CTA_SUB, pos='hero', start=0, lede_m=None):
     if video:
-        media = (f'<img class="bgblur" src="{A("/Assets/video/hero-poster.webp")}" alt="" aria-hidden="true" decoding="async">'
+        media = (f'<img class="bgblur" src="{A("/Assets/video/hero-poster.jpg")}" alt="" aria-hidden="true" decoding="async">'
                  f'<canvas class="hbg" width="96" height="170" aria-hidden="true"></canvas>'
+                 f'<div class="stage3d" aria-hidden="true">'
+                 f'<div class="pane c"><div class="in"><video class="pv2" muted loop playsinline preload="none" data-src="{A("/Assets/video/pane-c.mp4")}" poster="{A("/Assets/video/pane-c-poster.jpg")}"></video></div></div>'
+                 f'<div class="pane b"><div class="in"><video class="pv2" muted loop playsinline preload="none" data-src="{A("/Assets/video/pane-b.mp4")}" poster="{A("/Assets/video/pane-b-poster.jpg")}"></video></div></div>'
+                 f'<div class="pane a"><div class="in">'
                  f'<video class="hv" muted loop playsinline preload="metadata" aria-hidden="true" data-start="{start}" data-desktop="{A("/Assets/video/hero-desktop.mp4")}" data-mobile="{A("/Assets/video/hero-mobile.mp4")}"></video>'
-                 f'<picture class="poster"><source media="(max-width: 900px), (max-height: 500px)" type="image/webp" srcset="{A("/Assets/video/hero-poster-mobile.webp")}"><source media="(max-width: 900px), (max-height: 500px)" srcset="{A("/Assets/video/hero-poster-mobile.jpg")}"><source type="image/webp" srcset="{A("/Assets/video/hero-poster.webp")}"><img src="{A("/Assets/video/hero-poster.jpg")}" alt="" fetchpriority="high" decoding="async"></picture>')
+                 f'<picture class="poster"><source media="(max-width: 900px), (max-height: 500px)" srcset="{A("/Assets/video/hero-poster-mobile.jpg")}"><img src="{A("/Assets/video/hero-poster.jpg")}" alt="" fetchpriority="high" decoding="async"></picture>'
+                 f'</div></div></div>')
     else:
         media = pic(photo, '100vw', '', True, focus=focus, w_cap=1600)
     pr = f'<p class="price">{price[0]}<small>{price[1]}</small></p>' if price else ''
@@ -178,8 +183,8 @@ def film(title='What your dog actually does all day.', eyebrow='A day at camp'):
 
 
 def day_strip(title='Here is the day, start to finish.'):
-    figs = ''.join(f'<figure data-slot="{s}" class="r"><span class="now"><i></i>Right now</span>{pic(p, "(max-width: 760px) 50vw, 20vw", "", False)}<figcaption><small>{t}</small><b>{h}</b><span>{dsc}</span></figcaption></figure>' for s, t, h, dsc, p in DAY)
-    return f'<section class="day tight"><div class="wrap" data-stagger><p class="eyebrow r">The schedule</p><h2 class="r">{title}</h2><div class="grid">{figs}</div></div></section>'
+    figs = ''.join(f'<figure data-slot="{s}" class="r">{pic(p, "(max-width: 760px) 50vw, 20vw", "", False, focus=fc)}<figcaption><small>{t}<span class="now"><i></i>Right now</span></small><b>{h}</b><span>{dsc}</span></figcaption></figure>' for s, t, h, dsc, p, fc in DAY)
+    return f'<section class="day tight"><div class="wrap" data-stagger><p class="eyebrow r">The schedule</p><h2 class="r">{title}</h2><p class="hint r"><i></i>Swipe through the day</p><div class="grid">{figs}</div></div></section>'
 
 
 def reviews(idx=(0, 1, 2, 3), title='What the humans say.', four=True, lp='home'):
@@ -224,7 +229,7 @@ def team_block(eyebrow='Who is taking care of your dog?', h='Taylor and Hannah, 
 
 
 def story_short():
-    return team_block() + band('barn-lane-pano', 'Built by two brothers, for their own dogs first.', 'Ryan and Dan wanted a place they would trust with their own dogs, so they built one. Camp Cookstown opened in 2008 on 45 acres of Essa farmland, and the same two brothers still run it.', focus='28% 62%', button=btn('Meet Ryan and Dan', '/our-story', 'white'))
+    return team_block() + band('barn-lane-pano', 'Built by two brothers, for their own dogs first.', 'Ryan and Dan wanted a place they would trust with their own dogs, so they built one. Camp Cookstown opened in 2008 on 45 acres of Essa farmland, and the same two brothers still run it.', focus='28% 62%', button=btn('Meet Ryan and Dan', '/our-story', 'white'), whole=True)
 
 
 def gracie(lp='home', full=False):
@@ -233,10 +238,13 @@ def gracie(lp='home', full=False):
     <div class="m her">We do. Saturday is a weekend night, so it is $80 plus HST, and Brody would need a quick meet and greet first. It is free and takes about twenty minutes. Want me to book one this week?</div>
     <div class="m you">Yes please, Thursday afternoon?</div>
     <div class="m her">Done. Thursday at 1:15 pm. I have texted you the details, and Taylor and Hannah know Brody is coming.</div></div>"""
+    check = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+    points = ''.join(f'<li class="r"><i>{check}</i><div><b>{h}</b><span>{p}</span></div></li>' for h, p in GRACIE_POINTS)
     return f"""<section class="gracie{' full' if full else ' tight'}"><div class="wrap box" data-stagger><div><p class="eyebrow r">{GRACIE_EYEBROW}</p><h2 class="r">{GRACIE_H2}</h2>
-  <p class="r">{GRACIE_P1}</p><p class="r">{GRACIE_P2}</p>
-  <div class="ways r"><a href="{TEL}">Call {PHONE}</a><a href="{SMS}">Text {TEXT_NUMBER}</a></div>
-  <p class="fineline r">Anything she quotes is confirmed when you book.</p></div>
+  <p class="r lead d">{GRACIE_P1}</p><p class="r lead m">{GRACIE_P1_M}</p>
+  <ul class="points">{points}</ul>
+  <div class="ways r"><a class="btn btn-primary" href="{SMS}">Text {TEXT_NUMBER}</a><a class="btn btn-light" href="{TEL}">Call {PHONE}</a></div>
+  <p class="fineline r">{GRACIE_P2}</p></div>
   {bubble}</div></section>"""
 
 
@@ -246,8 +254,9 @@ def cta(lp='home', h='Start with a free meet and greet.', p='Walk the property, 
   <p class="r" style="margin-top:var(--s3);font-size:var(--t-small);opacity:.9">After that, book whenever you like online. Cancel any time, free.</p></div></section>"""
 
 
-def band(photo, h, lede=None, focus='center 50%', button=''):
-    return f"""<section class="band"><div class="par">{pic(photo, '100vw', '', False, focus=focus)}</div><div class="wrap"><h2 class="r">{h}</h2>{f'<p class="lede r">{lede}</p>' if lede else ''}{f'<div class="btns r" style="margin-top:var(--s4)">{button}</div>' if button else ''}</div></section>"""
+def band(photo, h, lede=None, focus='center 50%', button='', whole=False):
+    # whole: the band shows the entire photo (a panorama), on phones above the words, on wide screens at the photo's own shape
+    return f"""<section class="band{' whole' if whole else ''}"><div class="par">{pic(photo, '100vw', '', False, focus=focus)}</div><div class="wrap"><h2 class="r">{h}</h2>{f'<p class="lede r">{lede}</p>' if lede else ''}{f'<div class="btns r" style="margin-top:var(--s4)">{button}</div>' if button else ''}</div></section>"""
 
 
 def three(items, eyebrow, h, lede=None):
@@ -295,6 +304,10 @@ def jsonld(slug, title, desc, faq_items=None, rated=False):
 def page(slug, title, desc, body, active=None, noindex=False, lp=None, faq_items=None, og=None, lean=False, rated=False):
     lp = lp or (slug if slug != 'index' else 'home')
     canon = SITE + ('/' if slug == 'index' else '/' + slug)
+    # everything after a full screen hero sits in its own layer, so the page slides up over the hero on wide screens
+    if body.startswith('<div class="hero-wrap">'):
+        cut = body.index('</section></div>') + len('</section></div>')
+        body = body[:cut] + '<div class="after">' + body[cut:] + '</div>'
     robots = '<meta name="robots" content="noindex,follow">' if noindex else ''
     gtm = f"<script>(function(w,d,s,l,i){{var h=location.hostname;if(h!=='campcookstown.com'&&h!=='www.campcookstown.com'&&location.search.indexOf('__gtm=preview')<0)return;w[l]=w[l]||[];w[l].push({{'gtm.start':new Date().getTime(),event:'gtm.js'}});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f)}})(window,document,'script','dataLayer','{GTM}');</script>" if GTM else ''
     og = A(og or '/Assets/brand/og-home.jpg')
@@ -325,7 +338,7 @@ def home():
 
 
 def day():
-    b = hero('Dog day camp · Cookstown', 'Drop off a dog.<br>Pick up a happy one.', 'A whole day outside on 45 fenced acres with a pack of friends and counselors who adore them.', 'day-camp', video=True, start=2.6,
+    b = hero('Dog day camp · Cookstown', 'Drop off a dog.<br>Pick up a happy one.', 'A whole day outside on 45 fenced acres with a pack of friends and counselors who adore them.', 'day-camp', video=True,
              price=(f'<span class="pv" data-item-price="day.week">${RATES["day.week"]}</span> a day', f'or the ten day pack at <span class="pv" data-item-price="day.pack">${RATES["day.pack"]}</span>'))
     b += proof()
     b += three(DAY_THREE, 'Day camp, not daycare', 'A real camp, with the sky for a ceiling.', 'Camp is a farm. Dogs run, dig, splash and nap outside all day, and come into the barn when the weather sends them.')
@@ -387,7 +400,7 @@ def story():
       <div class="prose r"><p>At nineteen we left Ontario to play music, and the road took us further than we ever expected, all the way to Las Vegas, singing country classics on a stage with Shania Twain.</p>
       <p>The hard part was never the shows. It was leaving our dogs. We wanted a place we trusted, so when we came home we built one: a real camp, on 45 acres of farmland in Essa, where a dog can spend the day outside with friends and sleep in a warm barn with the pack.</p>
       <p>Camp Cookstown opened in 2008. The same two brothers still run it, with a team of counselors who are here for one reason. They love dogs the way we do.</p></div></div></section>"""
-    b += band('barn-lane-pano', 'Built in 2008 on 45 acres of Essa farmland.', focus='28% 62%')
+    b += band('barn-lane-pano', 'Built in 2008 on 45 acres of Essa farmland.', focus='28% 62%', whole=True)
     b += team_block('The team', 'The faces your dog will know.', 'Taylor and Hannah run the camp every day, with a crew of counselors who are here for one reason. They love dogs the way we do.')
     b += three([('sun', 'Cage free, always', 'A dog on vacation is outside with friends, and sleeps in the barn with the pack. It has been the promise since day one.'),
                 ('heart', 'Treated like our own', 'The same food, the same medication, the same fuss. If we would not do it for our dogs, we do not do it for yours.'),
@@ -483,7 +496,7 @@ def landing(slug):
     else:
         price = None
     night = kind in ('boarding', 'kennel', 'offer-night')
-    b = hero(eyebrow, h1, lede, slug, video=True, price=price, start=2.6 if kind in ('daycare', 'offer-day', 'puppy', 'camp') else 0)
+    b = hero(eyebrow, h1, lede, slug, video=True, price=price)
     b += proof()
     b += f'<section class="tight"><div class="wrap" data-stagger><p class="eyebrow r">Getting here</p><p class="lede r">{drive}</p></div></section>'
     b += reviews((4, 0, 2) if night else (1, 7, 3), 'What the humans say.', four=False, lp=slug)

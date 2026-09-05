@@ -106,14 +106,15 @@ DAY_FAQ = [GENERAL_FAQ[0], GENERAL_FAQ[1], GENERAL_FAQ[2], GENERAL_FAQ[4], GENER
 NIGHT_FAQ = [GENERAL_FAQ[6], GENERAL_FAQ[9], GENERAL_FAQ[8], GENERAL_FAQ[7], GENERAL_FAQ[10], GENERAL_FAQ[13]]
 
 # ---------------------------------------------------------------- the day, for the film captions and the clock
-# (slot, time label, headline, line, photo). The clock picks the slot by Ontario time.
+# (slot, time label, headline, line, photo, focus). The clock picks the slot by Ontario time.
+# focus is the object-position: where the crop settles when a tile is not the photo's own shape, so no dog loses a face.
 DAY = [
- ('dropoff',  '7:30 to 8:30 am', 'Drop off',           'Straight out to the field with their friends.', 'counselor-field-sky'),
- ('morning',  'Morning',         'The big romp',       '45 fenced acres of sun, shade and room to run until the zoomies run out.', 'field-run'),
- ('midday',   'Midday',          'Pools and shade',    'Puppy pools when it is hot, sunny spots when it is not.', 'spaniel-pool-hat'),
- ('afternoon','Afternoon',       'Barn naps',          'Heated in winter, cooled in summer. They nap wherever they like.', 'dachshund-nap'),
- ('evening',  'Evening',         'Dinner, one at a time', 'Your food, your portions, served one dog at a time.', 'chihuahua-blanket'),
- ('night',    'Night',           'Lights out with the pack', 'Snuggled in the barn, and a counselor is on the property every night.', 'goldens-asleep'),
+ ('dropoff',  '7:30 to 8:30 am', 'Drop off',           'Straight out to the field with their friends.', 'counselor-field-sky', 'center 60%'),
+ ('morning',  'Morning',         'The big romp',       '45 fenced acres of sun, shade and room to run until the zoomies run out.', 'field-run', 'center 55%'),
+ ('midday',   'Midday',          'Pools and shade',    'Puppy pools when it is hot, sunny spots when it is not.', 'spaniel-pool-hat', 'center 28%'),
+ ('afternoon','Afternoon',       'Barn naps',          'Heated in winter, cooled in summer. They nap wherever they like.', 'dachshund-nap', 'center 50%'),
+ ('evening',  'Evening',         'Dinner, one at a time', 'Your food, your portions, served one dog at a time.', 'chihuahua-blanket', 'center 42%'),
+ ('night',    'Night',           'Lights out with the pack', 'Snuggled in the barn, and a counselor is on the property every night.', 'goldens-asleep', 'center 72%'),
 ]
 # Film captions, shown as the footage scrubs. (start fraction, end fraction, small, big)
 FILM_CAPTIONS = [
@@ -132,9 +133,16 @@ RATES = {
 
 # ---------------------------------------------------------------- the Gracie line
 GRACIE_EYEBROW = 'Questions? Any hour.'
-GRACIE_H2 = 'Call or text. Gracie answers, day or night.'
-GRACIE_P1 = 'Gracie is our front desk, and she is an AI. She answers in seconds, day or night. Ask her what to pack, how a first night goes, or whether there is room this weekend, and she can book your free meet and greet while you are on the line.'
-GRACIE_P2 = 'Talk to her the way you would talk to us, in your own words. When a question needs a person, Taylor and Hannah get right back to you.'
+GRACIE_H2 = 'Text or call Gracie. Ask her anything.'
+# the one honest line (wide screens), then the three things to know at a glance (every screen)
+GRACIE_P1 = 'Gracie is our front desk, and she is an AI. She talks like a person and knows the camp like the family does, so ask her anything, in your own words.'
+GRACIE_P1_M = 'Gracie is our front desk, and she is an AI. She knows the camp like the family does.'
+GRACIE_POINTS = [
+ ('Any question about camp', 'What to pack, how a first night goes, whether there is room this weekend.'),
+ ('In seconds, day or night', 'She picks up every call and every text, any hour.'),
+ ('Books your free meet and greet', 'On the spot, while you are on the line.'),
+]
+GRACIE_P2 = 'When a question needs a person, Taylor and Hannah get right back to you. Anything she quotes is confirmed when you book.'
 
 # ---------------------------------------------------------------- towns for the landing pages
 # slug -> (title, meta description, H1 line one, H1 accent, hero lede, drive line, kind)

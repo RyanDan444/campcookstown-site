@@ -52,30 +52,49 @@ var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isInter
 $$('.r').forEach(function(el){io.observe(el)});
 $$('[data-stagger]').forEach(function(g){$$('.r',g).forEach(function(el,i){el.style.setProperty('--d',Math.min(i*0.08,0.32)+'s')})});
 
-/* ---------- hero video ---------- */
+/* ---------- hero video, and the three window stage on wide screens ---------- */
 (function(){
   var hero=$('.hero'); if(!hero) return;
-  var v=$('video.hv',hero), inner=$('.inner',hero), cv=$('canvas.hbg',hero), pause=$('.pausebtn',hero);
-  var mobile=PHONE.matches;
+  var v=$('video.hv',hero), inner=$('.inner',hero), cv=$('canvas.hbg',hero), pause=$('.pausebtn',hero), stage=$('.stage3d',hero), panes=$$('video.pv2',hero);
+  var mobile=PHONE.matches, vids=[], userPaused=false, covered=false;
+  var mx=0,my=0,sy=0,sp=0; /* mouse lean, scroll offset, scroll progress */
+  function place(){
+    if(inner){inner.style.transform='translate3d('+(mx*-6)+'px,'+(sy*0.18+my*-4)+'px,0)';inner.style.opacity=String(1-sp*1.15)}
+    if(stage&&!mobile){stage.style.setProperty('--sz',(sp*-420)+'px');stage.style.transform='translate3d(0,'+(sy*0.08)+'px,0)';stage.style.opacity=String(1-sp*1.05)}
+  }
+  function playAll(){vids.forEach(function(x){var q=x.play();if(q&&q.catch)q.catch(function(){})})}
+  function pauseAll(){vids.forEach(function(x){x.pause()})}
   if(v&&!RM&&!save){
     var src=v.getAttribute(mobile?'data-mobile':'data-desktop');
     var st=parseFloat(v.getAttribute('data-start')||'0');
     v.addEventListener('playing',function(){hero.classList.add('playing')},{once:true});
     if(st>0)v.addEventListener('loadedmetadata',function(){try{v.currentTime=st}catch(e){}},{once:true});
-    v.src=src;v.load();var p=v.play();if(p&&p.catch)p.catch(function(){});
-    if(pause){pause.hidden=false;pause.addEventListener('click',function(){var on=v.paused;if(on)v.play();else v.pause();pause.setAttribute('aria-pressed',on?'false':'true');pause.querySelector('span').textContent=on?'Pause':'Play'})}
-    /* wide screens: the tall video sits in the frame and a blurred copy of the same frame fills the sides */
-    if(cv&&!mobile){
-      var ctx=cv.getContext('2d'),running=false;
-      function paint(){if(!running)return;if(v.readyState>=2&&!v.paused){ctx.drawImage(v,0,0,cv.width,cv.height)}requestAnimationFrame(paint)}
-      var vis=new IntersectionObserver(function(es){es.forEach(function(e){running=e.isIntersecting;if(running)paint()})});
-      vis.observe(hero);
-    }
-  }else if(v){v.remove();if(cv)cv.remove();hero.classList.add('still')}
+    v.src=src;v.load();vids.push(v);
+    if(!mobile){
+      panes.forEach(function(pv){pv.src=pv.getAttribute('data-src');pv.load();vids.push(pv)});
+      /* the blurred backdrop is the front video itself, painted small and blurred by CSS */
+      if(cv){var ctx=cv.getContext('2d'),running=false;
+        function paint(){if(!running)return;if(!covered&&v.readyState>=2&&!v.paused){ctx.drawImage(v,0,0,cv.width,cv.height)}requestAnimationFrame(paint)}
+        var vis=new IntersectionObserver(function(es){es.forEach(function(e){running=e.isIntersecting;if(running)paint()})});vis.observe(hero)}
+      /* the stage leans with the mouse, and a soft light crosses the windows while the pointer is over them */
+      if(stage){var tx=0,ty=0,raf=false;
+        function tick(){mx+=(tx-mx)*0.08;my+=(ty-my)*0.08;var s=mx.toFixed(3),t=my.toFixed(3);stage.style.setProperty('--mx',s);stage.style.setProperty('--my',t);hero.style.setProperty('--mx',s);hero.style.setProperty('--my',t);place();
+          if(Math.abs(tx-mx)>0.002||Math.abs(ty-my)>0.002)requestAnimationFrame(tick);else raf=false}
+        hero.addEventListener('pointermove',function(e){var r=hero.getBoundingClientRect();tx=((e.clientX-r.left)/r.width-0.5)*2;ty=((e.clientY-r.top)/r.height-0.5)*2;stage.style.setProperty('--hov','1');if(!raf){raf=true;requestAnimationFrame(tick)}});
+        hero.addEventListener('pointerleave',function(){tx=0;ty=0;stage.style.setProperty('--hov','0');if(!raf){raf=true;requestAnimationFrame(tick)}});
+      }
+    }else{panes.forEach(function(pv){pv.remove()})}
+    playAll();
+    if(pause){pause.hidden=false;pause.addEventListener('click',function(){userPaused=!v.paused;if(userPaused)pauseAll();else playAll();pause.setAttribute('aria-pressed',userPaused?'true':'false');pause.querySelector('span').textContent=userPaused?'Play':'Pause'})}
+  }else if(v){v.remove();panes.forEach(function(pv){pv.remove()});if(cv)cv.remove();hero.classList.add('still')}
   if(RM||!inner) return;
   var stuck=hero.parentElement&&hero.parentElement.classList.contains('hero-wrap'),hh=hero.offsetHeight||1;
   w.addEventListener('resize',function(){hh=hero.offsetHeight||1});
-  function par(){var y=w.scrollY,p=clamp(y/hh,0,1);if(y>hh)return;inner.style.transform='translate3d(0,'+(y*0.22)+'px,0)';inner.style.opacity=String(1-p*1.15)}
+  function par(){var y=w.scrollY;
+    /* once the page has slid over the hero, the videos rest; they pick up again on the way back */
+    if(y>hh+40){if(!covered){covered=true;hero.classList.add('gone');if(vids.length&&!userPaused)pauseAll()}return}
+    if(covered){covered=false;hero.classList.remove('gone');if(vids.length&&!userPaused)playAll()}
+    sy=y;sp=clamp(y/hh,0,1);place()}
   if(stuck){par();onScroll(par)}
 })();
 
@@ -139,6 +158,9 @@ if(!RM&&!PHONE.matches){var bands=$$('.band .par');if(bands.length){function dri
     clocks.forEach(function(c){c.innerHTML='<i></i>It is '+t+' at camp. '+label+'.'});
   }
   tick();setInterval(tick,60000);
+  /* phones: the row of cards opens on the part of the day it is right now */
+  var row=$('.day .grid'), cur=$('.day figure.now-on');
+  if(row&&cur&&row.scrollWidth>row.clientWidth+8){var pad=parseFloat(getComputedStyle(row).paddingLeft)||0;row.scrollLeft=Math.max(0,cur.getBoundingClientRect().left-row.getBoundingClientRect().left-pad)}
 })();
 
 /* ---------- live prices from the booking system ---------- */

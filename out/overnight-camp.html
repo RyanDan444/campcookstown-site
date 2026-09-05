@@ -77,7 +77,8 @@ section.nf{padding-top:calc(112px + var(--s5));padding-bottom:var(--s6)}
 #top.hide{transform:translateY(-110%)}
 #top.onlight nav a,#top.onlight .signin{color:var(--ink)}
 #top.onlight .call,#top.onlight .menu{background:rgba(15,26,20,.06);border-color:rgba(15,26,20,.14);color:var(--ink)}
-@media (min-width:1000px){#top nav{display:flex}#top .signin{display:inline}#top .menu,#top .call{display:none}#top .logo img{height:50px}}
+@media (min-width:1000px){#top nav{display:flex}#top nav a{white-space:nowrap}#top .signin{display:inline;white-space:nowrap}#top .menu,#top .call{display:none}#top .logo img{height:50px}}
+@media (min-width:1000px) and (max-width:1199px){#top nav{gap:20px;font-size:.94rem}#top .signin{display:none}#top .book{padding:0 16px;font-size:.92rem}}
 @media (max-width:999px){#top .book{display:none}}
 body.lean #top nav,body.lean #top .signin,body.lean #top .menu{display:none}
 body.lean #top .book{display:inline-flex;min-height:44px;padding:0 16px;font-size:.92rem}
@@ -127,18 +128,52 @@ body.lean #top .book{display:inline-flex;min-height:44px;padding:0 16px;font-siz
 .hero .price small{display:block;font-family:var(--sans);font-size:var(--t-small);letter-spacing:0;opacity:.85;margin-top:4px}
 /* phones: the tall video fills the screen */
 @media (max-width:900px),(max-height:500px){.hero .lede{font-size:1.02rem;max-width:26em;margin-top:14px;line-height:1.45}.hero .sub{font-size:.9rem}.hero .callline{display:none}.hero h1{max-width:8em}.hero .inner{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.hero .pausebtn{display:none}}
-/* wide screens: the whole vertical frame, tall in the picture, over a soft blur of itself */
+/* phones: the stage is invisible, the main video fills the screen */
+.stage3d,.pane,.pane .in{display:contents}
+.pane.b,.pane.c{display:none}
+/* wide screens: the hero stays put and the page slides up over it. Three windows into camp, at three depths,
+   over a soft blur of the front one. The cluster is measured in vh so it keeps its shape on every screen. */
 @media (min-width:901px) and (min-height:501px){
-  .hero.tall .media canvas.hbg,.hero.tall .media .bgblur{display:block;position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;filter:blur(34px) brightness(.55) saturate(1.15)}
+  .hero-wrap{height:100svh}
+  .hero.tall{position:fixed;inset:0;height:100svh;align-items:center}
+  .hero.tall .media canvas.hbg,.hero.tall .media .bgblur{display:block;position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;filter:blur(34px) brightness(.5) saturate(1.15)}
   .hero.tall .media .bgblur{transition:opacity .8s var(--ease)}
   .hero.tall.playing .media .bgblur{opacity:0}
-  .hero.tall .media video.hv,.hero.tall .media .poster img{left:auto;right:6%;top:0;bottom:0;width:auto;height:100%;max-width:42vw;object-fit:cover;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);border-radius:0}
-  .hero.tall .media .poster{position:absolute;inset:0}
-  .hero.tall .shade{background:linear-gradient(90deg,rgba(15,26,20,.55) 0%,rgba(15,26,20,.25) 45%,rgba(15,26,20,0) 70%),linear-gradient(180deg,rgba(15,26,20,.3) 0%,rgba(15,26,20,0) 30%,rgba(15,26,20,.55) 100%)}
-  .hero.tall .inner{padding-right:46%}
-  .hero.tall h1{font-size:clamp(2.9rem,1rem + 4.6vw,5.4rem)}
+  .hero.tall .media::after{content:'';position:absolute;left:calc(90% - 22vh);top:46%;width:96vh;height:96vh;transform:translate(-50%,-50%) translate3d(calc(var(--mx,0) * -26px),calc(var(--my,0) * -18px),0);background:radial-gradient(closest-side,rgba(200,151,63,.32),rgba(200,151,63,0) 72%);pointer-events:none}
+  .hero.tall .stage3d{display:block;position:absolute;inset:0;perspective:1500px;perspective-origin:calc(90% - 22vh) 50%;transform-style:preserve-3d;overflow:hidden;z-index:1}
+  .hero.tall .pane{display:block;position:absolute;top:50%;transform-style:preserve-3d;will-change:transform;transform:translate3d(calc(var(--mx,0) * var(--px)),calc(var(--ty) + var(--my,0) * var(--py)),calc(var(--z) + var(--sz,0px))) rotateY(calc(var(--ry) + var(--mx,0) * var(--rx)))}
+  .hero.tall .pane .in{display:block;position:relative;height:100%;aspect-ratio:9/16;border-radius:18px;overflow:hidden;background:#111a15;box-shadow:0 50px 120px -30px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.07)}
+  .hero.tall .pane .in::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(108deg,rgba(255,255,255,0) 36%,rgba(255,255,255,.14) 50%,rgba(255,255,255,0) 64%);transform:translate3d(calc(-24% + var(--mx,0) * 60%),0,0);opacity:var(--hov,0);transition:opacity .8s var(--ease)}
+  .hero.tall .pane video,.hero.tall .pane img,.hero.tall .pane .poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;left:0;right:0;max-width:none;border-radius:0;box-shadow:none}
+  .hero.tall .pane.a{height:min(80vh,calc(100vh - 170px));right:10%;--z:0px;--ty:-50%;--ry:-6deg;--px:12px;--py:8px;--rx:2deg;z-index:3}
+  .hero.tall .pane.b{height:58vh;right:calc(10% + 41vh);--z:-420px;--ty:-46%;--ry:12deg;--px:26px;--py:16px;--rx:3deg;z-index:2}
+  .hero.tall .pane.b .in{filter:brightness(.84) saturate(.95)}
+  .hero.tall .pane.c{height:50vh;right:calc(10% - 22vh);--z:-560px;--ty:-62%;--ry:-18deg;--px:40px;--py:24px;--rx:4deg;z-index:1}
+  .hero.tall .pane.c .in{filter:brightness(.7) saturate(.9)}
+  .js .hero.tall .pane .in{animation:arrive 1.5s var(--ease) both,floaty 9s 1.5s ease-in-out infinite alternate}
+  .js .hero.tall .pane.b .in{animation-delay:.18s,1.7s}
+  .js .hero.tall .pane.a .in{animation-delay:.36s,1.9s;animation-duration:1.5s,11s}
+  @keyframes arrive{from{opacity:0;transform:translate3d(0,90px,-500px) rotateY(14deg)}to{opacity:1;transform:none}}
+  @keyframes floaty{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+  .hero.tall .shade{background:linear-gradient(90deg,rgba(15,26,20,.62) 0%,rgba(15,26,20,.3) 42%,rgba(15,26,20,0) 66%),linear-gradient(180deg,rgba(15,26,20,.3) 0%,rgba(15,26,20,0) 30%,rgba(15,26,20,.55) 100%);z-index:2;pointer-events:none}
+  .hero.tall .inner{padding-top:84px;padding-bottom:36px;z-index:4}
+  .hero.tall .inner > *{max-width:min(50%,34rem)}
+  @media (max-width:1199px){.hero.tall .inner > *{max-width:min(44%,34rem)}}
+  .hero.tall h1{font-size:clamp(2.9rem,1rem + 4.2vw,5rem);max-width:100%}
+  .js .hero.tall .inner > *{animation:rise .95s var(--ease) both}
+  .js .hero.tall .inner > :nth-child(1){animation-delay:.25s}
+  .js .hero.tall .inner > :nth-child(2){animation-delay:.34s}
+  .js .hero.tall .inner > :nth-child(3){animation-delay:.44s}
+  .js .hero.tall .inner > :nth-child(4){animation-delay:.52s}
+  .js .hero.tall .inner > :nth-child(5){animation-delay:.6s}
+  .js .hero.tall .inner > :nth-child(6){animation-delay:.68s}
+  @keyframes rise{from{opacity:0;transform:translate3d(0,28px,0)}to{opacity:1;transform:none}}
+  .hero.tall .cue,.hero.tall .pausebtn{z-index:5}
+  @media (prefers-reduced-motion:reduce){.js .hero.tall .pane .in,.js .hero.tall .inner > *{animation:none}}
 }
-main{position:relative;z-index:2;background:var(--paper);box-shadow:0 -30px 60px -30px rgba(0,0,0,.35)}
+main{position:relative;z-index:2;background:var(--paper)}
+.after{position:relative;z-index:1;background:var(--paper);box-shadow:0 -30px 60px -30px rgba(0,0,0,.35)}
+.hero.tall.gone{visibility:hidden}
 /* proof strip */
 .proof{background:var(--paper2);border-bottom:1px solid rgba(15,26,20,.07)}
 .proof .row{display:grid;grid-template-columns:1fr 1fr;gap:0}
@@ -191,24 +226,29 @@ main{position:relative;z-index:2;background:var(--paper);box-shadow:0 -30px 60px
 @media (min-width:900px){.film .clock{display:inline-flex}}
 .film.static{height:auto}.film.static .stage{position:relative;height:100svh;min-height:520px}.film.static .bar{display:none}
 .film .still,.film video.loop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.film.static video.loop{z-index:1}.film.static .still{display:none}
+.film.static video.loop{z-index:0}.film.static .still{display:none}
+.film .shade,.film .head,.film .clock,.film .cap,.film .bar{z-index:2}
 @media (prefers-reduced-motion:reduce){.film.static .stage{height:auto;aspect-ratio:9/12}.film .cap .c{position:relative;opacity:1;transform:none;left:0;right:0;bottom:0;margin-top:12px;padding:0 var(--gutter)}.film .cap{position:relative;padding:var(--s4) 0}}
 /* day strip (below the film) */
 .day{background:var(--ink);color:#fff;padding-bottom:clamp(64px,9vw,128px)}
-.day .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:var(--s4)}
-.day .grid figure img{aspect-ratio:16/11}
-@media (min-width:760px){.day .grid{grid-template-columns:repeat(3,1fr);gap:18px}.day .grid figure img{aspect-ratio:4/5}}
+/* phones: one row of cards to swipe through, the next card peeking in; wide screens: the whole day in one grid */
+.day .grid{display:flex;gap:12px;margin:var(--s3) calc(-1 * max(var(--gutter),env(safe-area-inset-left))) 0;padding:6px max(var(--gutter),env(safe-area-inset-left)) 8px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding:0 max(var(--gutter),env(safe-area-inset-left));-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.day .grid::-webkit-scrollbar{display:none}
+.day .grid figure{flex:0 0 72vw;max-width:340px;scroll-snap-align:start}
+.day .grid figure img{aspect-ratio:4/5}
+.day .hint{display:flex;align-items:center;gap:8px;margin-top:var(--s3);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:#9CCB9E;font-weight:600}
+.day .hint i{display:block;width:26px;height:1px;background:#9CCB9E;opacity:.7}
+@media (min-width:760px){.day .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:var(--s4) 0 0;padding:0;overflow:visible}.day .grid figure{max-width:none}.day .hint{display:none}}
 @media (min-width:1100px){.day .grid{grid-template-columns:repeat(6,1fr)}}
-.day .hint{display:none}
 .day figure{margin:0;position:relative;border-radius:var(--r2);overflow:hidden;background:#20302A}
 .day figure img{aspect-ratio:4/5;width:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
 .day figure:hover img{transform:scale(1.04)}
 .day figcaption{padding:12px 12px 14px}
-.day figcaption small{display:block;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:#9CCB9E;font-weight:600}
+.day figcaption small{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:#9CCB9E;font-weight:600;min-height:22px}
 .day figcaption b{display:block;font-family:var(--display);font-variation-settings:'SOFT' 100,'opsz' 60;font-weight:500;font-size:1.2rem;letter-spacing:-.01em;margin-top:4px}
 .day figcaption span{display:block;color:#C9D3CC;font-size:.88rem;margin-top:6px;line-height:1.4}
-.day figure .now{position:absolute;top:10px;left:10px;z-index:2;display:none;align-items:center;gap:7px;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;background:rgba(15,26,20,.7);backdrop-filter:blur(8px);padding:6px 10px;border-radius:999px}
-.day figure .now i{width:7px;height:7px;border-radius:50%;background:#5FCB7A}
+.day figure .now{display:none;align-items:center;gap:6px;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#fff;background:rgba(95,203,122,.22);border:1px solid rgba(95,203,122,.6);padding:3px 8px;border-radius:999px;line-height:1.2}
+.day figure .now i{width:6px;height:6px;border-radius:50%;background:#5FCB7A;box-shadow:0 0 0 3px rgba(95,203,122,.25)}
 .day figure.now-on .now{display:inline-flex}
 .day figure.now-on{outline:2px solid #5FCB7A;outline-offset:2px}
 /* reviews */
@@ -264,6 +304,19 @@ main{position:relative;z-index:2;background:var(--paper);box-shadow:0 -30px 60px
 .band .wrap{position:relative;z-index:2;width:100%;padding-bottom:clamp(40px,6vh,72px);padding-top:clamp(40px,6vh,72px)}
 .band h2{max-width:14em;text-shadow:0 2px 20px rgba(0,0,0,.35)}
 .band .lede{color:#fff;margin-top:var(--s2);max-width:30em}
+/* a panorama band shows the whole photo: on phones the picture sits above the words, on wide screens the band takes the photo's own shape */
+@media (max-width:900px){
+  .band.whole{display:block;min-height:0}
+  .band.whole .par{position:relative;inset:auto}
+  .band.whole picture,.band.whole img{position:relative;inset:auto;height:auto;object-fit:contain;object-position:center!important}
+  .band.whole:after{display:none}
+  .band.whole .wrap{padding-top:var(--s4);padding-bottom:var(--s5)}
+}
+@media (min-width:901px){
+  .band.whole{min-height:0;aspect-ratio:2600/1104}
+  .band.whole .par{inset:-2% 0}
+  .band.whole img{object-position:center!important}
+}
 /* team */
 .team{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:var(--s5);align-items:start}
 @media (min-width:860px){.team{grid-template-columns:1fr 1fr 1.3fr;gap:var(--s4);align-items:center}}
@@ -287,10 +340,17 @@ main{position:relative;z-index:2;background:var(--paper);box-shadow:0 -30px 60px
 .gracie .box{display:grid;gap:var(--s4);align-items:center}
 @media (min-width:900px){.gracie .box{grid-template-columns:1.15fr .85fr;gap:var(--s7)}}
 .gracie p{margin-top:var(--s3);max-width:36em;color:#213129}
-.gracie .ways{margin-top:var(--s3);display:flex;flex-wrap:wrap;gap:10px 28px;font-weight:600}
-.gracie .ways a{text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(30,90,56,.35)}
-.gracie .ways a:hover{color:var(--forest)}
-.gracie .fineline{font-size:var(--t-small);color:var(--muted);margin-top:14px}
+.gracie .points{list-style:none;margin:var(--s4) 0 0;padding:0;display:grid;gap:14px;max-width:36em}
+.gracie .points li{display:flex;gap:14px;align-items:flex-start}
+.gracie .points i{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--green);display:inline-flex;align-items:center;justify-content:center;margin-top:1px}
+.gracie .points svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.gracie .points b{display:block;font-weight:650;letter-spacing:-.005em}
+.gracie .points span{display:block;color:#3F4E46;font-size:var(--t-small);line-height:1.45;margin-top:2px}
+.gracie .ways{margin-top:var(--s4);display:grid;gap:10px}
+@media (min-width:480px){.gracie .ways{display:flex;flex-wrap:wrap;align-items:center}}
+.gracie .fineline{font-size:var(--t-small);color:var(--muted);margin-top:var(--s3);max-width:36em}
+.gracie .lead.m{display:none}
+@media (max-width:899px){.gracie .lead.d{display:none}.gracie .lead.m{display:block}.gracie h2{max-width:11em}}
 .gracie .bubble{background:#fff;border-radius:var(--r);padding:26px;box-shadow:var(--shadow);display:grid;gap:14px;max-width:420px;justify-self:center;width:100%}
 .gracie .bubble .m{padding:12px 16px;border-radius:18px;font-size:.98rem;line-height:1.45;max-width:88%}
 .gracie .bubble .m.you{background:var(--green);color:#fff;justify-self:end;border-bottom-right-radius:6px}
@@ -400,8 +460,8 @@ footer.lean{padding:var(--s5) 0 calc(var(--s4) + 70px)}footer.lean .lean-row{dis
 </div></header>
 <div id="drawer" aria-hidden="true"><div class="head"><img src="/Assets/brand/logo-240.15f4b756.png" srcset="/Assets/brand/logo-240.15f4b756.png 1x, /Assets/brand/logo-480.e0f240b6.png 2x" width="120" height="79" alt="Camp Cookstown"><button class="x" type="button" data-menu aria-label="Close menu">&times;</button></div>
   <div class="links"><a href="/day-camp">Day Camp</a><a href="/overnight-camp" aria-current="page">Overnight Camp</a><a href="/rates">Rates</a><a href="/camp-life">Camp Life</a><a href="/our-story">Our Story</a></div>
-  <div class="foot"><a class="btn btn-primary" href="https://book.campcookstown.com/get-started?src=site&cmp=overnight-camp-menu">Book a free meet and greet<svg class="arr" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><div class="quiet"><a href="tel:+17054344777">Call</a><span>·</span><a href="sms:+17054102267">Text</a><span>·</span><a href="https://book.campcookstown.com/login?signin=1">Family sign in</a></div></div></div><main id="main" tabindex="-1"><div class="hero-wrap"><section class="hero tall"><div class="media"><img class="bgblur" src="/Assets/video/hero-poster.af1ab58f.webp" alt="" aria-hidden="true" decoding="async"><canvas class="hbg" width="96" height="170" aria-hidden="true"></canvas><video class="hv" muted loop playsinline preload="metadata" aria-hidden="true" data-start="0" data-desktop="/Assets/video/hero-desktop.e1059c5b.mp4" data-mobile="/Assets/video/hero-mobile.09313844.mp4"></video><picture class="poster"><source media="(max-width: 900px), (max-height: 500px)" type="image/webp" srcset="/Assets/video/hero-poster-mobile.2380b57f.webp"><source media="(max-width: 900px), (max-height: 500px)" srcset="/Assets/video/hero-poster-mobile.b6ebe942.jpg"><source type="image/webp" srcset="/Assets/video/hero-poster.af1ab58f.webp"><img src="/Assets/video/hero-poster.4b676d35.jpg" alt="" fetchpriority="high" decoding="async"></picture></div><div class="shade"></div><div class="inner"><p class="eyebrow">Dog boarding · Cookstown</p><h1>Days in the field. Nights in the barn.</h1><p class="lede">Full days outside on 45 acres, dinner served one at a time, and a warm barn to fall asleep in with the pack. A counselor is on the property every night.</p><p class="price">From <span class="pv" data-item-price="overnight.week">$65</span> a night<small>weekends <span class="pv" data-item-price="overnight.weekend">$80</span>, holidays <span class="pv" data-item-price="overnight.holiday">$100</span></small></p>
-      <div class="act"><a class="btn btn-primary" href="https://book.campcookstown.com/get-started?src=site&cmp=overnight-camp-hero">Book a free meet and greet<svg class="arr" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div><p class="sub">Free, about twenty minutes. Then your dog’s first day or night is on us. <b class="callline">Or call <a href="tel:+17054344777">(705) 434-4777</a>.</b></p></div><div class="cue"><span>Scroll</span><i></i></div><button type="button" class="pausebtn" hidden aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg><span>Pause</span></button></section></div><div class="proof"><div class="wrap row">
+  <div class="foot"><a class="btn btn-primary" href="https://book.campcookstown.com/get-started?src=site&cmp=overnight-camp-menu">Book a free meet and greet<svg class="arr" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><div class="quiet"><a href="tel:+17054344777">Call</a><span>·</span><a href="sms:+17054102267">Text</a><span>·</span><a href="https://book.campcookstown.com/login?signin=1">Family sign in</a></div></div></div><main id="main" tabindex="-1"><div class="hero-wrap"><section class="hero tall"><div class="media"><img class="bgblur" src="/Assets/video/hero-poster.7725726d.jpg" alt="" aria-hidden="true" decoding="async"><canvas class="hbg" width="96" height="170" aria-hidden="true"></canvas><div class="stage3d" aria-hidden="true"><div class="pane c"><div class="in"><video class="pv2" muted loop playsinline preload="none" data-src="/Assets/video/pane-c.748db435.mp4" poster="/Assets/video/pane-c-poster.1af27f66.jpg"></video></div></div><div class="pane b"><div class="in"><video class="pv2" muted loop playsinline preload="none" data-src="/Assets/video/pane-b.bab3bcfa.mp4" poster="/Assets/video/pane-b-poster.b7d65737.jpg"></video></div></div><div class="pane a"><div class="in"><video class="hv" muted loop playsinline preload="metadata" aria-hidden="true" data-start="0" data-desktop="/Assets/video/hero-desktop.0ed74b1a.mp4" data-mobile="/Assets/video/hero-mobile.e858f10f.mp4"></video><picture class="poster"><source media="(max-width: 900px), (max-height: 500px)" srcset="/Assets/video/hero-poster-mobile.d12e5f05.jpg"><img src="/Assets/video/hero-poster.7725726d.jpg" alt="" fetchpriority="high" decoding="async"></picture></div></div></div></div><div class="shade"></div><div class="inner"><p class="eyebrow">Dog boarding · Cookstown</p><h1>Days in the field. Nights in the barn.</h1><p class="lede">Full days outside on 45 acres, dinner served one at a time, and a warm barn to fall asleep in with the pack. A counselor is on the property every night.</p><p class="price">From <span class="pv" data-item-price="overnight.week">$65</span> a night<small>weekends <span class="pv" data-item-price="overnight.weekend">$80</span>, holidays <span class="pv" data-item-price="overnight.holiday">$100</span></small></p>
+      <div class="act"><a class="btn btn-primary" href="https://book.campcookstown.com/get-started?src=site&cmp=overnight-camp-hero">Book a free meet and greet<svg class="arr" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div><p class="sub">Free, about twenty minutes. Then your dog’s first day or night is on us. <b class="callline">Or call <a href="tel:+17054344777">(705) 434-4777</a>.</b></p></div><div class="cue"><span>Scroll</span><i></i></div><button type="button" class="pausebtn" hidden aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg><span>Pause</span></button></section></div><div class="after"><div class="proof"><div class="wrap row">
   <div class="cell"><b><span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>4.8 on Google</b><span>281 reviews</span></div>
   <div class="cell"><b><span class="stars sp" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>45 acres</b><span>Fenced farmland</span></div>
   <div class="cell"><b><span class="stars sp" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>Cage free</b><span>A heated barn and a real pack</span></div>
@@ -414,22 +474,23 @@ footer.lean{padding:var(--s5) 0 calc(var(--s4) + 70px)}footer.lean .lean-row{dis
       <div class="btns r" style="margin-top:var(--s4)"><a class="btn btn-primary" href="https://book.campcookstown.com/get-started?src=site&cmp=overnight-camp-rates">Book a free meet and greet<svg class="arr" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
       <div class="perk r" style="margin-top:var(--s5)"><b>The Spa Treatment</b><span>A wash, dry, ears and nails before pick up, so they go home fresh. Priced by size and coat.</span><a href="/spa">About the spa</a></div></div></section><section class="film" data-frames="68" data-base="/Assets/film.4c579ff4" aria-label="Real footage from a day at camp"><div class="stage">
   <img class="still" src="/Assets/film.4c579ff4/d/001.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
-  <video class="loop" muted loop playsinline preload="none" aria-hidden="true" data-src="/Assets/video/day-mobile.8a5a583c.mp4" poster="/Assets/video/day-poster-mobile.42003c9a.jpg"></video>
+  <video class="loop" muted loop playsinline preload="none" aria-hidden="true" data-src="/Assets/video/day-mobile.7aff1459.mp4" poster="/Assets/video/day-poster-mobile.6b3beca0.jpg"></video>
   <canvas aria-hidden="true"></canvas><div class="shade"></div>
   <div class="head"><p class="eyebrow">Sleepover footage</p><h2>A day and a night at camp.</h2></div><p class="clock" aria-live="off"></p>
-  <div class="cap"><div class="c" data-a="0.0" data-b="0.3"><small>Morning</small><b>Straight out to the field with friends.</b></div><div class="c" data-a="0.3" data-b="0.56"><small>All day</small><b>Outside in the sun, the shade and the puppy pools.</b></div><div class="c" data-a="0.56" data-b="0.8"><small>Any time</small><b>Belly rubs whenever they ask.</b></div><div class="c" data-a="0.8" data-b="1.0"><small>Afternoon</small><b>Then a very good nap.</b></div></div><div class="bar"><i></i></div></div></section><section class="day tight"><div class="wrap" data-stagger><p class="eyebrow r">The schedule</p><h2 class="r">A day and a night, start to finish.</h2><div class="grid"><figure data-slot="dropoff" class="r"><span class="now"><i></i>Right now</span><picture><source type="image/avif" srcset="/Assets/photos/counselor-field-sky-w480.6255fa59.avif 480w, /Assets/photos/counselor-field-sky-w900.f936f9e4.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/counselor-field-sky-w900.698c2995.webp" srcset="/Assets/photos/counselor-field-sky-w480.738bb832.webp 480w, /Assets/photos/counselor-field-sky-w900.698c2995.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="900" alt="A camp counselor laughing on the field with a golden retriever and a yellow lab in her lap, more dogs behind her under a big sky" loading="lazy" decoding="async" class=""></picture><figcaption><small>7:30 to 8:30 am</small><b>Drop off</b><span>Straight out to the field with their friends.</span></figcaption></figure><figure data-slot="morning" class="r"><span class="now"><i></i>Right now</span><picture><source type="image/avif" srcset="/Assets/photos/field-run-w480.200187fb.avif 480w, /Assets/photos/field-run-w900.1f5e577e.avif 900w, /Assets/photos/field-run-w1600.4b3850f1.avif 1600w, /Assets/photos/field-run-w2400.26624949.avif 2400w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/field-run-w2400.66650db2.webp" srcset="/Assets/photos/field-run-w480.09df601e.webp 480w, /Assets/photos/field-run-w900.552df603.webp 900w, /Assets/photos/field-run-w1600.bb997ca9.webp 1600w, /Assets/photos/field-run-w2400.66650db2.webp 2400w" sizes="(max-width: 760px) 50vw, 20vw" width="2400" height="1800" alt="Dogs running full tilt across the field at camp" loading="lazy" decoding="async" class=""></picture><figcaption><small>Morning</small><b>The big romp</b><span>45 fenced acres of sun, shade and room to run until the zoomies run out.</span></figcaption></figure><figure data-slot="midday" class="r"><span class="now"><i></i>Right now</span><picture><source type="image/avif" srcset="/Assets/photos/spaniel-pool-hat-w480.eef01ccb.avif 480w, /Assets/photos/spaniel-pool-hat-w900.caaaf621.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/spaniel-pool-hat-w900.b57010f2.webp" srcset="/Assets/photos/spaniel-pool-hat-w480.1f382520.webp 480w, /Assets/photos/spaniel-pool-hat-w900.b57010f2.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="1196" alt="A cavalier in a denim sun hat stepping through a blue puppy pool" loading="lazy" decoding="async" class=""></picture><figcaption><small>Midday</small><b>Pools and shade</b><span>Puppy pools when it is hot, sunny spots when it is not.</span></figcaption></figure><figure data-slot="afternoon" class="r"><span class="now"><i></i>Right now</span><picture><source type="image/avif" srcset="/Assets/photos/dachshund-nap-w480.ec196451.avif 480w, /Assets/photos/dachshund-nap-w900.e18f6cc1.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/dachshund-nap-w900.fe8efd0e.webp" srcset="/Assets/photos/dachshund-nap-w480.4d57f418.webp 480w, /Assets/photos/dachshund-nap-w900.fe8efd0e.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="1124" alt="A dachshund asleep upside down on a fluffy bed" loading="lazy" decoding="async" class=""></picture><figcaption><small>Afternoon</small><b>Barn naps</b><span>Heated in winter, cooled in summer. They nap wherever they like.</span></figcaption></figure><figure data-slot="evening" class="r"><span class="now"><i></i>Right now</span><picture><source type="image/avif" srcset="/Assets/photos/chihuahua-blanket-w480.47df27da.avif 480w, /Assets/photos/chihuahua-blanket-w900.314c8bd8.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/chihuahua-blanket-w900.76053bbd.webp" srcset="/Assets/photos/chihuahua-blanket-w480.ef621cb0.webp 480w, /Assets/photos/chihuahua-blanket-w900.76053bbd.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="1125" alt="A chihuahua wrapped in a white fleece blanket in the barn" loading="lazy" decoding="async" class=""></picture><figcaption><small>Evening</small><b>Dinner, one at a time</b><span>Your food, your portions, served one dog at a time.</span></figcaption></figure><figure data-slot="night" class="r"><span class="now"><i></i>Right now</span><picture><source type="image/avif" srcset="/Assets/photos/goldens-asleep-w480.bfc16feb.avif 480w, /Assets/photos/goldens-asleep-w900.ddd88cf0.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/goldens-asleep-w900.15723b3c.webp" srcset="/Assets/photos/goldens-asleep-w480.41e13650.webp 480w, /Assets/photos/goldens-asleep-w900.15723b3c.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="1119" alt="Two golden retrievers fast asleep, heads together, on a red blanket" loading="lazy" decoding="async" class=""></picture><figcaption><small>Night</small><b>Lights out with the pack</b><span>Snuggled in the barn, and a counselor is on the property every night.</span></figcaption></figure></div></div></section><section><div class="wrap" data-stagger><div class="split"><div><p class="eyebrow r">How it works</p><h2 class="r">Three free steps, then your dog decides.</h2></div><p class="lede r">Nothing to pay and nothing to sign up for until you have seen the place and your dog has had a day here.</p></div>
+  <div class="cap"><div class="c" data-a="0.0" data-b="0.3"><small>Morning</small><b>Straight out to the field with friends.</b></div><div class="c" data-a="0.3" data-b="0.56"><small>All day</small><b>Outside in the sun, the shade and the puppy pools.</b></div><div class="c" data-a="0.56" data-b="0.8"><small>Any time</small><b>Belly rubs whenever they ask.</b></div><div class="c" data-a="0.8" data-b="1.0"><small>Afternoon</small><b>Then a very good nap.</b></div></div><div class="bar"><i></i></div></div></section><section class="day tight"><div class="wrap" data-stagger><p class="eyebrow r">The schedule</p><h2 class="r">A day and a night, start to finish.</h2><p class="hint r"><i></i>Swipe through the day</p><div class="grid"><figure data-slot="dropoff" class="r"><picture><source type="image/avif" srcset="/Assets/photos/counselor-field-sky-w480.6255fa59.avif 480w, /Assets/photos/counselor-field-sky-w900.f936f9e4.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/counselor-field-sky-w900.698c2995.webp" srcset="/Assets/photos/counselor-field-sky-w480.738bb832.webp 480w, /Assets/photos/counselor-field-sky-w900.698c2995.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="900" alt="A camp counselor laughing on the field with a golden retriever and a yellow lab in her lap, more dogs behind her under a big sky" loading="lazy" decoding="async" class="" style="object-position:center 60%"></picture><figcaption><small>7:30 to 8:30 am<span class="now"><i></i>Right now</span></small><b>Drop off</b><span>Straight out to the field with their friends.</span></figcaption></figure><figure data-slot="morning" class="r"><picture><source type="image/avif" srcset="/Assets/photos/field-run-w480.200187fb.avif 480w, /Assets/photos/field-run-w900.1f5e577e.avif 900w, /Assets/photos/field-run-w1600.4b3850f1.avif 1600w, /Assets/photos/field-run-w2400.26624949.avif 2400w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/field-run-w2400.66650db2.webp" srcset="/Assets/photos/field-run-w480.09df601e.webp 480w, /Assets/photos/field-run-w900.552df603.webp 900w, /Assets/photos/field-run-w1600.bb997ca9.webp 1600w, /Assets/photos/field-run-w2400.66650db2.webp 2400w" sizes="(max-width: 760px) 50vw, 20vw" width="2400" height="1800" alt="Dogs running full tilt across the field at camp" loading="lazy" decoding="async" class="" style="object-position:center 55%"></picture><figcaption><small>Morning<span class="now"><i></i>Right now</span></small><b>The big romp</b><span>45 fenced acres of sun, shade and room to run until the zoomies run out.</span></figcaption></figure><figure data-slot="midday" class="r"><picture><source type="image/avif" srcset="/Assets/photos/spaniel-pool-hat-w480.eef01ccb.avif 480w, /Assets/photos/spaniel-pool-hat-w900.caaaf621.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/spaniel-pool-hat-w900.b57010f2.webp" srcset="/Assets/photos/spaniel-pool-hat-w480.1f382520.webp 480w, /Assets/photos/spaniel-pool-hat-w900.b57010f2.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="1196" alt="A cavalier in a denim sun hat stepping through a blue puppy pool" loading="lazy" decoding="async" class="" style="object-position:center 28%"></picture><figcaption><small>Midday<span class="now"><i></i>Right now</span></small><b>Pools and shade</b><span>Puppy pools when it is hot, sunny spots when it is not.</span></figcaption></figure><figure data-slot="afternoon" class="r"><picture><source type="image/avif" srcset="/Assets/photos/dachshund-nap-w480.ec196451.avif 480w, /Assets/photos/dachshund-nap-w900.e18f6cc1.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/dachshund-nap-w900.fe8efd0e.webp" srcset="/Assets/photos/dachshund-nap-w480.4d57f418.webp 480w, /Assets/photos/dachshund-nap-w900.fe8efd0e.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="1124" alt="A dachshund asleep upside down on a fluffy bed" loading="lazy" decoding="async" class="" style="object-position:center 50%"></picture><figcaption><small>Afternoon<span class="now"><i></i>Right now</span></small><b>Barn naps</b><span>Heated in winter, cooled in summer. They nap wherever they like.</span></figcaption></figure><figure data-slot="evening" class="r"><picture><source type="image/avif" srcset="/Assets/photos/chihuahua-blanket-w480.47df27da.avif 480w, /Assets/photos/chihuahua-blanket-w900.314c8bd8.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/chihuahua-blanket-w900.76053bbd.webp" srcset="/Assets/photos/chihuahua-blanket-w480.ef621cb0.webp 480w, /Assets/photos/chihuahua-blanket-w900.76053bbd.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="1125" alt="A chihuahua wrapped in a white fleece blanket in the barn" loading="lazy" decoding="async" class="" style="object-position:center 42%"></picture><figcaption><small>Evening<span class="now"><i></i>Right now</span></small><b>Dinner, one at a time</b><span>Your food, your portions, served one dog at a time.</span></figcaption></figure><figure data-slot="night" class="r"><picture><source type="image/avif" srcset="/Assets/photos/goldens-asleep-w480.bfc16feb.avif 480w, /Assets/photos/goldens-asleep-w900.ddd88cf0.avif 900w" sizes="(max-width: 760px) 50vw, 20vw"><img src="/Assets/photos/goldens-asleep-w900.15723b3c.webp" srcset="/Assets/photos/goldens-asleep-w480.41e13650.webp 480w, /Assets/photos/goldens-asleep-w900.15723b3c.webp 900w" sizes="(max-width: 760px) 50vw, 20vw" width="900" height="1119" alt="Two golden retrievers fast asleep, heads together, on a red blanket" loading="lazy" decoding="async" class="" style="object-position:center 72%"></picture><figcaption><small>Night<span class="now"><i></i>Right now</span></small><b>Lights out with the pack</b><span>Snuggled in the barn, and a counselor is on the property every night.</span></figcaption></figure></div></div></section><section><div class="wrap" data-stagger><div class="split"><div><p class="eyebrow r">How it works</p><h2 class="r">Three free steps, then your dog decides.</h2></div><p class="lede r">Nothing to pay and nothing to sign up for until you have seen the place and your dog has had a day here.</p></div>
   <div class="steps"><div class="step r"><span class="n">1</span><h3>Book a free meet and greet</h3><p>Two minutes online. Pick a day that suits you. No card needed.</p><span class="free">Free</span></div><div class="step r"><span class="n">2</span><h3>Come say hi</h3><p>About twenty minutes. Walk the property, meet the team, and your dog meets a few new friends.</p><span class="free">Free</span></div><div class="step r"><span class="n">3</span><h3>First day or night on us</h3><p>A free trial visit, so your dog can decide. Then book whenever you like.</p><span class="free">Free</span></div></div><div class="btns r" style="margin-top:var(--s5)"><a class="btn btn-primary" href="https://book.campcookstown.com/get-started?src=site&cmp=overnight-camp-steps">Book a free meet and greet<svg class="arr" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></section><section class="tight"><div class="wrap" data-stagger><p class="eyebrow r">Overnight questions</p><h2 class="r">What people ask before the first sleepover.</h2><div class="faq"><details class="r"><summary>Is someone with the dogs at night?<i>+</i></summary><div class="a">The barn is theirs at night, warm in winter and cool in summer, and a counselor is on the property every night of the year.</div></details><details class="r"><summary>What about food?<i>+</i></summary><div class="a">Bring their usual food and we serve it exactly as you would, one dog at a time so nobody shares. Forgot it? We have food for $50 plus the cost of the bag.</div></details><details class="r"><summary>Can you give medication?<i>+</i></summary><div class="a">Yes, at no charge. Bring it in the original container with the instructions.</div></details><details class="r"><summary>What if my dog gets hurt or sick?<i>+</i></summary><div class="a">Every counselor is certified in Pet First Aid and Pet CPR, and a 24 hour emergency vet clinic is close by. A vet visit is $40 plus the clinic’s bill.</div></details><details class="r"><summary>My dog is a senior. Is camp too much?<i>+</i></summary><div class="a">Not at all. Counselors match groups by energy and keep an eye on the slower campers, and there is always a quiet spot in the barn for a nap.</div></details><details class="r"><summary>How far ahead should I book?<i>+</i></summary><div class="a">As early as you can. Camp fills up, especially long weekends, March Break and Christmas.</div></details></div>
-  <p class="fine r">Something else? Call (705) 434-4777 or text 705 410 2267, any hour. Gracie, our AI front desk, answers in seconds, and Taylor and Hannah take it from there.</p></div></section><section class="gracie tight"><div class="wrap box" data-stagger><div><p class="eyebrow r">Questions? Any hour.</p><h2 class="r">Call or text. Gracie answers, day or night.</h2>
-  <p class="r">Gracie is our front desk, and she is an AI. She answers in seconds, day or night. Ask her what to pack, how a first night goes, or whether there is room this weekend, and she can book your free meet and greet while you are on the line.</p><p class="r">Talk to her the way you would talk to us, in your own words. When a question needs a person, Taylor and Hannah get right back to you.</p>
-  <div class="ways r"><a href="tel:+17054344777">Call (705) 434-4777</a><a href="sms:+17054102267">Text 705 410 2267</a></div>
-  <p class="fineline r">Anything she quotes is confirmed when you book.</p></div>
+  <p class="fine r">Something else? Call (705) 434-4777 or text 705 410 2267, any hour. Gracie, our AI front desk, answers in seconds, and Taylor and Hannah take it from there.</p></div></section><section class="gracie tight"><div class="wrap box" data-stagger><div><p class="eyebrow r">Questions? Any hour.</p><h2 class="r">Text or call Gracie. Ask her anything.</h2>
+  <p class="r lead d">Gracie is our front desk, and she is an AI. She talks like a person and knows the camp like the family does, so ask her anything, in your own words.</p><p class="r lead m">Gracie is our front desk, and she is an AI. She knows the camp like the family does.</p>
+  <ul class="points"><li class="r"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i><div><b>Any question about camp</b><span>What to pack, how a first night goes, whether there is room this weekend.</span></div></li><li class="r"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i><div><b>In seconds, day or night</b><span>She picks up every call and every text, any hour.</span></div></li><li class="r"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i><div><b>Books your free meet and greet</b><span>On the spot, while you are on the line.</span></div></li></ul>
+  <div class="ways r"><a class="btn btn-primary" href="sms:+17054102267">Text 705 410 2267</a><a class="btn btn-light" href="tel:+17054344777">Call (705) 434-4777</a></div>
+  <p class="fineline r">When a question needs a person, Taylor and Hannah get right back to you. Anything she quotes is confirmed when you book.</p></div>
   <div class="bubble r"><div class="who"><i></i>Gracie · a sample text</div>
     <div class="m you">Hi! Do you have room for my golden, Brody, this Saturday night?</div>
     <div class="m her">We do. Saturday is a weekend night, so it is $80 plus HST, and Brody would need a quick meet and greet first. It is free and takes about twenty minutes. Want me to book one this week?</div>
     <div class="m you">Yes please, Thursday afternoon?</div>
     <div class="m her">Done. Thursday at 1:15 pm. I have texted you the details, and Taylor and Hannah know Brody is coming.</div></div></div></section><section class="cta"><div class="wrap" data-stagger><h2 class="r">Start with a free night at camp.</h2><p class="lede r">Book the free meet and greet online. Walk the property, meet the team, and your dog’s first night is on us.</p>
   <div class="btns r"><a class="btn btn-white" href="https://book.campcookstown.com/get-started?src=site&cmp=overnight-camp-cta">Book a free meet and greet<svg class="arr" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn btn-ghost" href="tel:+17054344777">Call (705) 434-4777</a></div>
-  <p class="r" style="margin-top:var(--s3);font-size:var(--t-small);opacity:.9">After that, book whenever you like online. Cancel any time, free.</p></div></section></main><footer><div class="wrap"><div class="cols">
+  <p class="r" style="margin-top:var(--s3);font-size:var(--t-small);opacity:.9">After that, book whenever you like online. Cancel any time, free.</p></div></section></div></main><footer><div class="wrap"><div class="cols">
   <div class="blurb"><img src="/Assets/brand/logo-240.15f4b756.png" alt="Camp Cookstown" width="120" height="79"><p>Cage free dog day camp and overnight camp on 45 acres in Essa, Ontario. Minutes from Cookstown and Highway 400, serving Barrie, Innisfil, Alliston, Bradford, Newmarket and Tottenham since 2008.</p><div class="social"><a href="https://www.instagram.com/campcookstown/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2zm0 2A3.5 3.5 0 0 0 4 7.5v9A3.5 3.5 0 0 0 7.5 20h9a3.5 3.5 0 0 0 3.5-3.5v-9A3.5 3.5 0 0 0 16.5 4h-9zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm5.3-3.3a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4z"/></svg></a><a href="https://www.tiktok.com/@campcookstown" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M16.5 3c.4 2.4 1.9 4 4.5 4.2v3.3c-1.7 0-3.2-.5-4.5-1.4v6.4a6 6 0 1 1-6-6c.3 0 .7 0 1 .1v3.4a2.7 2.7 0 1 0 1.7 2.5V3h3.3z"/></svg></a><a href="https://www.facebook.com/pages/Camp-Cookstown/124979261032671" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.8c0-.9.3-1.6 1.6-1.6h1.7V4.4c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.3H7.4V14h2.8v8h3.3z"/></svg></a><a href="https://www.youtube.com/user/CampCookstownChannel" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M22.5 7.2a2.8 2.8 0 0 0-2-2C18.8 4.8 12 4.8 12 4.8s-6.8 0-8.5.4a2.8 2.8 0 0 0-2 2C1 8.9 1 12 1 12s0 3.1.5 4.8a2.8 2.8 0 0 0 2 2c1.7.4 8.5.4 8.5.4s6.8 0 8.5-.4a2.8 2.8 0 0 0 2-2c.5-1.7.5-4.8.5-4.8s0-3.1-.5-4.8zM9.8 15.1V8.9l5.7 3.1-5.7 3.1z"/></svg></a></div></div>
   <div><h4>Camp</h4><ul><li><a href="/day-camp">Day Camp</a></li><li><a href="/overnight-camp">Overnight Camp</a></li><li><a href="/rates">Rates</a></li><li><a href="/camp-life">Camp Life</a></li><li><a href="/our-story">Our Story</a></li></ul></div>
   <div><h4>Good to know</h4><ul><li><a href="/faq">Questions</a></li><li><a href="/reviews">Reviews</a></li><li><a href="/spa">The Spa Treatment</a></li><li><a href="/contact">Contact and directions</a></li><li><a href="https://book.campcookstown.com/login?signin=1">Family sign in</a></li></ul></div>
@@ -488,30 +549,49 @@ var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isInter
 $$('.r').forEach(function(el){io.observe(el)});
 $$('[data-stagger]').forEach(function(g){$$('.r',g).forEach(function(el,i){el.style.setProperty('--d',Math.min(i*0.08,0.32)+'s')})});
 
-/* ---------- hero video ---------- */
+/* ---------- hero video, and the three window stage on wide screens ---------- */
 (function(){
   var hero=$('.hero'); if(!hero) return;
-  var v=$('video.hv',hero), inner=$('.inner',hero), cv=$('canvas.hbg',hero), pause=$('.pausebtn',hero);
-  var mobile=PHONE.matches;
+  var v=$('video.hv',hero), inner=$('.inner',hero), cv=$('canvas.hbg',hero), pause=$('.pausebtn',hero), stage=$('.stage3d',hero), panes=$$('video.pv2',hero);
+  var mobile=PHONE.matches, vids=[], userPaused=false, covered=false;
+  var mx=0,my=0,sy=0,sp=0; /* mouse lean, scroll offset, scroll progress */
+  function place(){
+    if(inner){inner.style.transform='translate3d('+(mx*-6)+'px,'+(sy*0.18+my*-4)+'px,0)';inner.style.opacity=String(1-sp*1.15)}
+    if(stage&&!mobile){stage.style.setProperty('--sz',(sp*-420)+'px');stage.style.transform='translate3d(0,'+(sy*0.08)+'px,0)';stage.style.opacity=String(1-sp*1.05)}
+  }
+  function playAll(){vids.forEach(function(x){var q=x.play();if(q&&q.catch)q.catch(function(){})})}
+  function pauseAll(){vids.forEach(function(x){x.pause()})}
   if(v&&!RM&&!save){
     var src=v.getAttribute(mobile?'data-mobile':'data-desktop');
     var st=parseFloat(v.getAttribute('data-start')||'0');
     v.addEventListener('playing',function(){hero.classList.add('playing')},{once:true});
     if(st>0)v.addEventListener('loadedmetadata',function(){try{v.currentTime=st}catch(e){}},{once:true});
-    v.src=src;v.load();var p=v.play();if(p&&p.catch)p.catch(function(){});
-    if(pause){pause.hidden=false;pause.addEventListener('click',function(){var on=v.paused;if(on)v.play();else v.pause();pause.setAttribute('aria-pressed',on?'false':'true');pause.querySelector('span').textContent=on?'Pause':'Play'})}
-    /* wide screens: the tall video sits in the frame and a blurred copy of the same frame fills the sides */
-    if(cv&&!mobile){
-      var ctx=cv.getContext('2d'),running=false;
-      function paint(){if(!running)return;if(v.readyState>=2&&!v.paused){ctx.drawImage(v,0,0,cv.width,cv.height)}requestAnimationFrame(paint)}
-      var vis=new IntersectionObserver(function(es){es.forEach(function(e){running=e.isIntersecting;if(running)paint()})});
-      vis.observe(hero);
-    }
-  }else if(v){v.remove();if(cv)cv.remove();hero.classList.add('still')}
+    v.src=src;v.load();vids.push(v);
+    if(!mobile){
+      panes.forEach(function(pv){pv.src=pv.getAttribute('data-src');pv.load();vids.push(pv)});
+      /* the blurred backdrop is the front video itself, painted small and blurred by CSS */
+      if(cv){var ctx=cv.getContext('2d'),running=false;
+        function paint(){if(!running)return;if(!covered&&v.readyState>=2&&!v.paused){ctx.drawImage(v,0,0,cv.width,cv.height)}requestAnimationFrame(paint)}
+        var vis=new IntersectionObserver(function(es){es.forEach(function(e){running=e.isIntersecting;if(running)paint()})});vis.observe(hero)}
+      /* the stage leans with the mouse, and a soft light crosses the windows while the pointer is over them */
+      if(stage){var tx=0,ty=0,raf=false;
+        function tick(){mx+=(tx-mx)*0.08;my+=(ty-my)*0.08;var s=mx.toFixed(3),t=my.toFixed(3);stage.style.setProperty('--mx',s);stage.style.setProperty('--my',t);hero.style.setProperty('--mx',s);hero.style.setProperty('--my',t);place();
+          if(Math.abs(tx-mx)>0.002||Math.abs(ty-my)>0.002)requestAnimationFrame(tick);else raf=false}
+        hero.addEventListener('pointermove',function(e){var r=hero.getBoundingClientRect();tx=((e.clientX-r.left)/r.width-0.5)*2;ty=((e.clientY-r.top)/r.height-0.5)*2;stage.style.setProperty('--hov','1');if(!raf){raf=true;requestAnimationFrame(tick)}});
+        hero.addEventListener('pointerleave',function(){tx=0;ty=0;stage.style.setProperty('--hov','0');if(!raf){raf=true;requestAnimationFrame(tick)}});
+      }
+    }else{panes.forEach(function(pv){pv.remove()})}
+    playAll();
+    if(pause){pause.hidden=false;pause.addEventListener('click',function(){userPaused=!v.paused;if(userPaused)pauseAll();else playAll();pause.setAttribute('aria-pressed',userPaused?'true':'false');pause.querySelector('span').textContent=userPaused?'Play':'Pause'})}
+  }else if(v){v.remove();panes.forEach(function(pv){pv.remove()});if(cv)cv.remove();hero.classList.add('still')}
   if(RM||!inner) return;
   var stuck=hero.parentElement&&hero.parentElement.classList.contains('hero-wrap'),hh=hero.offsetHeight||1;
   w.addEventListener('resize',function(){hh=hero.offsetHeight||1});
-  function par(){var y=w.scrollY,p=clamp(y/hh,0,1);if(y>hh)return;inner.style.transform='translate3d(0,'+(y*0.22)+'px,0)';inner.style.opacity=String(1-p*1.15)}
+  function par(){var y=w.scrollY;
+    /* once the page has slid over the hero, the videos rest; they pick up again on the way back */
+    if(y>hh+40){if(!covered){covered=true;hero.classList.add('gone');if(vids.length&&!userPaused)pauseAll()}return}
+    if(covered){covered=false;hero.classList.remove('gone');if(vids.length&&!userPaused)playAll()}
+    sy=y;sp=clamp(y/hh,0,1);place()}
   if(stuck){par();onScroll(par)}
 })();
 
@@ -575,6 +655,9 @@ if(!RM&&!PHONE.matches){var bands=$$('.band .par');if(bands.length){function dri
     clocks.forEach(function(c){c.innerHTML='<i></i>It is '+t+' at camp. '+label+'.'});
   }
   tick();setInterval(tick,60000);
+  /* phones: the row of cards opens on the part of the day it is right now */
+  var row=$('.day .grid'), cur=$('.day figure.now-on');
+  if(row&&cur&&row.scrollWidth>row.clientWidth+8){var pad=parseFloat(getComputedStyle(row).paddingLeft)||0;row.scrollLeft=Math.max(0,cur.getBoundingClientRect().left-row.getBoundingClientRect().left-pad)}
 })();
 
 /* ---------- live prices from the booking system ---------- */

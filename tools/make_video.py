@@ -5,16 +5,16 @@ Source: the 23 Aug 2026 4K upscale of Camp Cookstown (Real Hero)_4, 2160x3840, 3
 Memory safe: each scene is cut on its own first (fast seek), then the small intermediates are crossfaded.
 
 Outputs (into OUT):
-  hero-mobile.mp4    810x1440  vertical loop, opens on the pack in the field, ends on the rainbow, seamless
-  hero-desktop.mp4  1080x1920  the same cut, sharper, for the tall centred video on wide screens
+  hero-mobile.mp4    810x1440  the whole film, uncut, as a seamless loop (phones, full screen)
+  hero-desktop.mp4   900x1600  the same, sharper, for the front window of the 3D stage on wide screens
   hero-poster.jpg / hero-poster-mobile.jpg   first frame of each
+  pane-b.mp4 / pane-c.mp4  540x960  short loops of other scenes for the two back windows
   day-mobile.mp4     648x1152  the day loop for phones (field, hose, belly rub, nap), autoplay, 8.4 s
   film/d/NNN.webp   1200x676   desktop film frames, 8 fps, scrubbed by scroll
 
-The seamless loop: the sequence is rainbow-tail, field, willow, hose, belly, rainbow, field-head, with
-crossfades. The first crossfade (rainbow tail into field) and the last (rainbow into field head) end on the
-same field frame, so trimming the start at the end of the first fade and stopping at the end of the last
-gives a first frame identical to the last frame.
+Seamless loops: the tail of the last scene is crossfaded into the head of the first, and the output is
+trimmed so that its first and last frames are the same frame (see full() and pane()). The older scene cut
+of the hero is still available as 'hero-cut'.
 """
 import os, subprocess, sys, shutil
 
@@ -33,6 +33,7 @@ SCENES = {
     'belly': (31.50, 35.90, 1150),
     'bellyrub': (20.00, 22.00, 1350),
     'nap': (9.00, 11.50, 1500),
+    'golden': (28.70, 30.30, 1200),
 }
 HERO_ORDER = ['field', 'willow', 'hose', 'belly', 'rainbow']
 FILM_ORDER = ['field', 'hose', 'bellyrub', 'nap']
@@ -92,6 +93,53 @@ def hero(mode, w, h, base, crf, maxrate, poster):
     print('hero', base, 'bytes', os.path.getsize(mp4), 'duration about', round(total - start, 2)); sys.stdout.flush()
 
 
+def probe_duration(path):
+    out = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', path], capture_output=True, text=True).stdout.strip()
+    return float(out)
+
+
+def full(w, h, base, crf, maxrate, poster):
+    """The whole 36 second film, uncut, opening on the rainbow, as a loop.
+
+    The master is scaled once (title text on the opening shot removed). The last half second is crossfaded into
+    the opening shot, so the loop returns to the rainbow through a fade rather than a cut; the opening shot is a
+    slow pan, so the half second it then steps back is invisible."""
+    inter = os.path.join(TMP, f'full-{w}x{h}.mp4')
+    if not os.path.exists(inter):
+        run(['ffmpeg', '-v', 'error', '-y', '-i', SRC, '-vf', f"{DELOGO}:enable='between(t,0,2.75)',scale={w}:{h}:flags=lanczos,setsar=1,format=yuv420p",
+             '-an', '-c:v', 'libx264', '-preset', 'fast', '-crf', '12', '-r', '30', '-threads', '2', inter])
+    dur = probe_duration(inter)
+    head = os.path.join(TMP, f'full-head-{w}x{h}.mp4')
+    run(['ffmpeg', '-v', 'error', '-y', '-i', inter, '-t', f'{XF + 0.2:.3f}', '-an', '-c:v', 'libx264', '-preset', 'fast', '-crf', '12', '-r', '30', '-threads', '2', head])
+    mp4 = os.path.join(OUT, base + '.mp4')
+    fc = f'[0:v][1:v]xfade=transition=fade:duration={XF}:offset={dur - XF:.3f}[vout]'
+    run(['ffmpeg', '-v', 'error', '-y', '-i', inter, '-i', head, '-filter_complex', fc, '-map', '[vout]', '-t', f'{dur:.3f}',
+         '-an', '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-crf', str(crf), '-maxrate', maxrate, '-bufsize', '4M',
+         '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-r', '30', '-threads', '2', mp4])
+    run(['ffmpeg', '-v', 'error', '-y', '-i', mp4, '-frames:v', '1', '-q:v', '3', os.path.join(OUT, poster)])
+    print('full', base, 'bytes', os.path.getsize(mp4), 'duration about', round(dur, 2)); sys.stdout.flush()
+
+
+def pane(order, base, w, h, crf, maxrate, poster=None):
+    """A small seamless loop of a few scenes: last scene tail, the scenes, first scene head, crossfaded, so the
+    first and last frames are the same frame. Used for the two back windows of the desktop hero and the phone
+    film loop."""
+    l_s, l_e, _ = SCENES[order[-1]]
+    f_s, f_e, _ = SCENES[order[0]]
+    seq = [(order[-1], l_e - XF, l_e)] + [(n, SCENES[n][0], SCENES[n][1]) for n in order] + [(order[0], f_s, f_s + XF)]
+    files, durs = [], []
+    for name, s, e in seq:
+        files.append(cut(name, s, e, 'full', w, h, base))
+        durs.append(e - s)
+    inputs, fc, total = xfade(files, durs)
+    mp4 = os.path.join(OUT, base + '.mp4')
+    run(['ffmpeg', '-v', 'error', '-y'] + inputs + ['-filter_complex', fc, '-map', '[vout]', '-ss', f'{XF:.3f}',
+         '-an', '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-crf', str(crf), '-maxrate', maxrate, '-bufsize', '2M',
+         '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-r', '30', '-threads', '2', mp4])
+    run(['ffmpeg', '-v', 'error', '-y', '-i', mp4, '-frames:v', '1', '-q:v', '4', os.path.join(OUT, poster or (base + '-poster.jpg'))])
+    print('pane', base, 'bytes', os.path.getsize(mp4), 'duration about', round(total - XF, 2)); sys.stdout.flush()
+
+
 def film_frames(w, h, q, final_scale):
     files, durs = [], []
     for n in FILM_ORDER:
@@ -110,26 +158,22 @@ def film_frames(w, h, q, final_scale):
 
 
 def day_loop(w, h, crf, maxrate):
-    files, durs = [], []
-    for n in FILM_ORDER:
-        s, e, _ = SCENES[n]
-        files.append(cut(n, s, e, 'full', w, h, 'day-m'))
-        durs.append(e - s)
-    inputs, fc, total = xfade(files, durs)
-    mp4 = os.path.join(OUT, 'day-mobile.mp4')
-    run(['ffmpeg', '-v', 'error', '-y'] + inputs + ['-filter_complex', fc + ';[vout]fade=t=in:st=0:d=0.3,fade=t=out:st=%.2f:d=0.3[f]' % (total - 0.3), '-map', '[f]',
-         '-an', '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-crf', str(crf), '-maxrate', maxrate, '-bufsize', '2M',
-         '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-r', '30', '-threads', '2', mp4])
-    run(['ffmpeg', '-v', 'error', '-y', '-i', mp4, '-frames:v', '1', '-q:v', '3', os.path.join(OUT, 'day-poster-mobile.jpg')])
-    print('day loop bytes', os.path.getsize(mp4), 'duration', round(total, 2)); sys.stdout.flush()
+    pane(FILM_ORDER, 'day-mobile', w, h, crf, maxrate, poster='day-poster-mobile.jpg')
 
 
 if __name__ == '__main__':
     what = sys.argv[3] if len(sys.argv) > 3 else 'all'
     if what in ('all', 'hero'):
+        full(810, 1440, 'hero-mobile', 31, '1200k', 'hero-poster-mobile.jpg')
+        full(900, 1600, 'hero-desktop', 29, '1900k', 'hero-poster.jpg')
+    if what == 'hero-cut':
         hero('full', 810, 1440, 'hero-mobile', 30, '1400k', 'hero-poster-mobile.jpg')
         hero('full', 1080, 1920, 'hero-desktop', 28, '3500k', 'hero-poster.jpg')
     if what in ('all', 'film'):
         film_frames(1440, 810, 54, '1200:676')
+    if what in ('all', 'film', 'day'):
         day_loop(648, 1152, 30, '1200k')
+    if what in ('all', 'panes'):
+        pane(['hose', 'bellyrub', 'golden'], 'pane-b', 540, 960, 30, '900k')
+        pane(['nap', 'belly', 'willow'], 'pane-c', 540, 960, 30, '900k')
     print('ALL DONE')

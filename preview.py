@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """One file previews of a built page with every asset inlined, for a private review link.
 python3 preview.py index phone  -> preview/index-phone.html  (mobile video, mobile film, photos <= 900 px)
-python3 preview.py index desk   -> preview/index-desk.html   (desktop video, desktop film, photos <= 1600 px)
+python3 preview.py index desk   -> preview/index-desk.html   (desktop video, desktop film, photos <= 1200 px)
+The hero videos come from light encodes in preview/_tmp (720x1280 crf 33 for phones, 640x1138 crf 34 for desk),
+so that a one file preview stays under the 16 MB artifact limit.
 """
 import os, re, sys, base64, json
 
@@ -39,7 +41,11 @@ def main():
     # hero video: keep one source
     lite = os.path.join(PV, '_tmp', 'hero-mobile.mp4' if mode == 'phone' else 'hero-desktop.mp4')
     v = uri(os.path.relpath(lite, OUT))
-    html = re.sub(r'data-desktop="[^"]+"', f'data-desktop="{v}"', html); html = re.sub(r'data-mobile="[^"]+"', f'data-mobile="{v}"', html)
+    # one copy of the video serves both the phone and the desktop attribute
+    html = re.sub(r' data-desktop="[^"]+"', '', html); html = re.sub(r'data-mobile="[^"]+"', f'data-mobile="{v}"', html)
+    html = html.replace("var src=v.getAttribute(mobile?'data-mobile':'data-desktop');", "var src=v.getAttribute('data-mobile')||v.getAttribute('data-desktop');")
+    # the font preloads would duplicate the inlined fonts
+    html = re.sub(r'<link rel="preload" href="[^"]*" as="font"[^>]*>', '', html)
     for path in set(re.findall(r'"(/Assets/video/hero-poster[^"]+)"', html)):
         html = html.replace(f'"{path}"', f'"{uri(path)}"')
     for path in set(re.findall(r'srcset="(/Assets/video/hero-poster[^"]+)"', html)):
@@ -56,7 +62,7 @@ def main():
         html = html.replace('<script>', '<script>window.FILM_FRAMES=' + json.dumps(frames) + ';</script><script>', 1)
         html = html.replace("function url(i){return base+'/d/'+String(i+1).padStart(3,'0')+'.webp'}", "function url(i){return (w.FILM_FRAMES&&w.FILM_FRAMES[i])||(base+'/d/'+String(i+1).padStart(3,'0')+'.webp')}")
     for path in set(re.findall(r'"(/Assets/(?:video|film[^"/]*)/[^"]+)"', html)):
-        if os.path.exists(os.path.join(OUT, path.lstrip('/'))) and 'hero-' not in path and not (mode != 'phone' and 'day-' in path):
+        if os.path.exists(os.path.join(OUT, path.lstrip('/'))) and 'hero-' not in path and not (mode != 'phone' and 'day-' in path) and not (mode == 'phone' and 'pane-' in path):
             html = html.replace(f'"{path}"', f'"{uri(path)}"')
     # fonts, brand images, remaining asset urls
     for path in set(re.findall(r'(/Assets/(?:fonts|brand)/[\w.-]+)', html)):
@@ -69,6 +75,15 @@ def main():
     outp = os.path.join(PV, f'{slug}-{mode}.html')
     open(outp, 'w').write(html)
     print(outp, round(os.path.getsize(outp) / 1e6, 1), 'MB', len(frames), 'frames inlined')
+    # the same page as an artifact body: the head's title, styles and scripts, then the body, no document tags
+    head = re.search(r'<head>(.*?)</head>', html, re.S).group(1)
+    body = re.search(r'<body[^>]*>(.*)</body>', html, re.S).group(1)
+    keep = ''.join(re.findall(r'<title>.*?</title>|<style>.*?</style>|<script[^>]*>.*?</script>', head, re.S))
+    bodycls = re.search(r'<body([^>]*)>', html).group(1)
+    art = keep + (f'<div{bodycls}>' + body + '</div>' if 'class=' in bodycls else body)
+    artp = os.path.join(PV, f'artifact-{mode}.html')
+    open(artp, 'w').write(art)
+    print(artp, round(os.path.getsize(artp) / 1e6, 1), 'MB')
 
 
 if __name__ == '__main__':
