@@ -200,7 +200,7 @@ def rate_tiles(lp='home'):
     return f"""<section class="mist"><div class="wrap" data-stagger><div class="split"><div><p class="eyebrow r">Prices, on the page</p><h2 class="r">Real prices, right here.</h2></div>
   <p class="lede r">Ten percent off each extra dog from the same home. Cancel any time, free. All prices plus HST.</p></div>
   <div class="cards two">{cards}</div>
-  <p class="fine r">Holidays and long weekends are <span class="pv" data-item-price="overnight.holiday">${RATES["overnight.holiday"]}</span> a night, half paid at booking. <a href="/rates" style="font-weight:600;text-decoration:underline;text-underline-offset:3px">Every rate, in one place</a>.</p></div></section>"""
+  <p class="fine r">Holidays and long weekends are <span class="pv" data-item-price="overnight.holiday">${RATES["overnight.holiday"]}</span> a night. Those dates fill up early, so half is paid at booking and that deposit is the one thing we cannot refund. <a href="/rates" style="font-weight:600;text-decoration:underline;text-underline-offset:3px">Every rate, in one place</a>.</p></div></section>"""
 
 
 def steps(lp='home', h='Three free steps, then your dog decides.'):
@@ -321,7 +321,7 @@ def home():
              'Day camp and overnight camp on 45 acres of farmland at Cookstown, minutes from Highway 400. Every dog runs with the pack all day and sleeps in a warm barn at night.', 'home', video=True,
              lede_m='Day camp and overnight camp on 45 acres at Cookstown, minutes from Highway 400.')
     b += proof() + doors() + reviews() + film() + day_strip() + rate_tiles() + steps() + story_short() + gracie() + cta()
-    page('index', 'Camp Cookstown | Dog Boarding and Day Camp near Barrie', 'Cage free dog day camp and overnight boarding on 45 acres at Cookstown, minutes from Highway 400. Heated barn, supervised play, open every day since 2008. Free meet and greet, then the first day or night is on us.', b, '/', rated=True)
+    page('index', 'Camp Cookstown | Dog Boarding and Day Camp near Barrie', 'Cage free dog day camp and overnight boarding on 45 acres at Cookstown, minutes off Highway 400. Heated barn, open every day since 2008. Free meet and greet first.', b, '/', rated=True)
 
 
 def day():
@@ -336,14 +336,14 @@ def day():
           ('Ten Day Pack', f'<span class="pv" data-item-price="day.pack">${RATES["day.pack"]}</span>', 'for ten days', 'Ten days for the price of eight. Use them whenever you like.', ['That is <span class="pv" data-item-price="day.perday">$40</span> a day', 'Book each day online in seconds', 'Ten percent off each extra dog'])]
     cards = ''.join(f'<article class="card r"><div class="name"><h3>{n}</h3><div class="amt">{p}<em style="font-family:var(--sans)">{per}</em></div></div><p class="spec">{sp}</p><ul>{"".join(f"<li>{x}</li>" for x in lis)}</ul><div class="act">{btn(CTA, book("card", "day-camp"))}</div></article>' for n, p, per, sp, lis in dc)
     b += f"""<section class="mist"><div class="wrap" data-stagger><p class="eyebrow r">Day camp rates</p><h2 class="r">Two prices. Simple.</h2>
-      <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">{cards}</div><p class="fine r">Prices are plus HST. Dogs need to be over three months old, healthy, free of fleas and ticks, and spayed or neutered if over nine months.</p></div></section>"""
+      <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">{cards}</div><p class="fine r">Prices are plus HST. Dogs need to be over three months old, healthy, free of fleas and ticks, current on their rabies shot, and spayed or neutered if over nine months.</p></div></section>"""
     b += steps('day-camp') + faq(DAY_FAQ, 'Day camp questions', 'What people ask before the first day.') + gracie('day-camp')
     b += cta('day-camp', 'The first day is free.', 'Book the free meet and greet online. Walk the property, meet the team, and let your dog decide.')
     page('day-camp', 'Dog Daycare near Barrie and Innisfil | Camp Cookstown Day Camp', 'Cage free dog day camp on 45 acres at Cookstown, minutes from Barrie and Innisfil. $50 a day, ten day pack $400, first day free. Open every day of the year.', b, '/day-camp', faq_items=DAY_FAQ, rated=True)
 
 
 def night():
-    rows = [('Weeknights', 'Monday to Thursday', 'overnight.week'), ('Weekends', 'Friday to Sunday', 'overnight.weekend'), ('Eight nights or more', 'Any nights', 'overnight.t3'), ('Fifteen nights or more', 'Any nights', 'overnight.t4'), ('Twenty eight nights or more', 'Any nights', 'overnight.t5'), ('Holidays and long weekends', 'March Break, and December 20 to January 1. Half paid at booking.', 'overnight.holiday')]
+    rows = [('Weeknights', 'Monday to Thursday', 'overnight.week'), ('Weekends', 'Friday to Sunday', 'overnight.weekend'), ('Eight nights or more', 'Any nights', 'overnight.t3'), ('Fifteen nights or more', 'Any nights', 'overnight.t4'), ('Twenty eight nights or more', 'Any nights', 'overnight.t5'), ('Holidays and long weekends', 'March Break, and December 20 to January 1. Half paid at booking, and that deposit stays with the camp if plans change.', 'overnight.holiday')]
     tbl = ''.join(f'<tr><td><b>{a}</b><span>{d}</span></td><td class="amt"><span class="pv" data-item-price="{k}">${RATES[k]}</span> <small>a night</small></td></tr>' for a, d, k in rows)
     b = hero('Dog boarding · Cookstown', 'Days in the field. Nights in the barn.', 'Full days outside on 45 acres, dinner served one at a time, and a warm barn to fall asleep in with the pack. A counselor is on the property every night.', 'overnight-camp', video=True,
              price=(f'From <span class="pv" data-item-price="overnight.week">${RATES["overnight.week"]}</span> a night', f'weekends <span class="pv" data-item-price="overnight.weekend">${RATES["overnight.weekend"]}</span>, holidays <span class="pv" data-item-price="overnight.holiday">${RATES["overnight.holiday"]}</span>'))
@@ -367,9 +367,9 @@ def rates():
         return '<table class="price r"><thead><tr><th>What</th><th>Price</th></tr></thead><tbody>' + ''.join(f'<tr><td><b>{a}</b><span>{d}</span></td><td class="amt">{p}{unit}</td></tr>' for a, d, p in rows) + '</tbody></table>'
     P = lambda k: f'<span class="pv" data-item-price="{k}">${RATES[k]}</span>'
     dayrows = [('Day Camp', 'One full day, any day of the year', P('day.week')), ('Ten Day Pack', '$40 a day, use them whenever you like', P('day.pack'))]
-    nightrows = [('Weeknights', 'Monday to Thursday', P('overnight.week')), ('Weekends', 'Friday to Sunday', P('overnight.weekend')), ('Eight nights or more', 'Any nights', P('overnight.t3')), ('Fifteen nights or more', 'Any nights', P('overnight.t4')), ('Twenty eight nights or more', 'Any nights', P('overnight.t5')), ('Holidays and long weekends', 'March Break, and December 20 to January 1. Half paid at booking.', P('overnight.holiday'))]
+    nightrows = [('Weeknights', 'Monday to Thursday', P('overnight.week')), ('Weekends', 'Friday to Sunday', P('overnight.weekend')), ('Eight nights or more', 'Any nights', P('overnight.t3')), ('Fifteen nights or more', 'Any nights', P('overnight.t4')), ('Twenty eight nights or more', 'Any nights', P('overnight.t5')), ('Holidays and long weekends', 'March Break, and December 20 to January 1. Half paid at booking, and that deposit stays with the camp if plans change.', P('overnight.holiday'))]
     extras = [('The Spa Treatment', 'Wash, dry, massage, ears and nails, for campers only', 'By size and coat'), ('Vet visit', 'If your dog needs the clinic, we take them', '$40 plus the bill'), ('Food, if you forget it', 'We have some on hand', '$50 plus the bag'), ('Late pick up', 'Between 5 and 6 pm on the last day of a stay', P('overnight.pm-pickup') + ', a day of camp')]
-    b = hero('Rates · Day and overnight', 'Real prices, on the page.', 'Everything below is plus HST. Ten percent off each extra dog from the same home. Cancel any time, free.', 'rates', photo='pack-looking-up', focus='center 18%', short=True, sub=None)
+    b = hero('Rates · Day and overnight', 'Real prices, on the page.', 'Everything below is plus HST. Ten percent off each extra dog from the same home. Cancel any time at no charge, holiday deposits aside.', 'rates', photo='pack-looking-up', focus='center 18%', short=True, sub=None)
     b += f"""<section><div class="wrap" data-stagger><p class="eyebrow r">Day camp</p><h2 class="r">Two prices. Simple.</h2>{tbl(dayrows)}
       <p class="r" style="margin-top:var(--s4)"><a href="/day-camp" style="font-weight:600;text-decoration:underline;text-underline-offset:4px">What a day at camp looks like</a></p></div></section>"""
     b += f"""<section class="mist"><div class="wrap" data-stagger><p class="eyebrow r">Overnight camp</p><h2 class="r">The longer the stay, the lower the night.</h2>{tbl(nightrows, ' <small>a night</small>')}
@@ -435,7 +435,7 @@ def contact():
     b += gracie('contact', full=True)
     b += band('goldens-two-faces', 'Come walk the property. The meet and greet is free.', focus='center 40%')
     b += cta('contact', 'Book the free meet and greet.', 'Twenty minutes, a walk around the farm, and your dog meets a few new friends.')
-    page('contact', 'Contact | Camp Cookstown, Essa, Ontario', f'Camp Cookstown, {ADDRESS}. Call or text {PHONE} any hour. Open every day. Drop off 7:30 to 8:30 am or 11 to noon, pick up 11 to noon or 5 to 6 pm.', b)
+    page('contact', 'Contact | Camp Cookstown, Essa, Ontario', f'Camp Cookstown, {ADDRESS}. Call or text {PHONE} any hour. Open every day, drop off from 7:30 am.', b)
 
 
 def spa():
