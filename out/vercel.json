@@ -1,0 +1,137 @@
+{
+ "cleanUrls": true,
+ "trailingSlash": false,
+ "redirects": [
+  {
+   "source": "/about",
+   "destination": "/our-story",
+   "permanent": true
+  },
+  {
+   "source": "/about/meet-owners",
+   "destination": "/our-story",
+   "permanent": true
+  },
+  {
+   "source": "/about/why-choose-us",
+   "destination": "/faq",
+   "permanent": true
+  },
+  {
+   "source": "/top-10-reasons",
+   "destination": "/faq",
+   "permanent": true
+  },
+  {
+   "source": "/guest-services",
+   "destination": "/",
+   "permanent": true
+  },
+  {
+   "source": "/guest-services/day-camp",
+   "destination": "/day-camp",
+   "permanent": true
+  },
+  {
+   "source": "/guest-services/overnight-camp",
+   "destination": "/overnight-camp",
+   "permanent": true
+  },
+  {
+   "source": "/guest-services/the-spa-treatment",
+   "destination": "/spa",
+   "permanent": true
+  },
+  {
+   "source": "/guest-services/transportation",
+   "destination": "/contact",
+   "permanent": true
+  },
+  {
+   "source": "/photos",
+   "destination": "/camp-life",
+   "permanent": true
+  },
+  {
+   "source": "/videos",
+   "destination": "/camp-life",
+   "permanent": true
+  },
+  {
+   "source": "/faqs",
+   "destination": "/faq",
+   "permanent": true
+  },
+  {
+   "source": "/our-rates",
+   "destination": "/rates",
+   "permanent": true
+  },
+  {
+   "source": "/contact-us",
+   "destination": "/contact",
+   "permanent": true
+  },
+  {
+   "source": "/index.php",
+   "destination": "/",
+   "permanent": true
+  },
+  {
+   "source": "/dog-boarding-toronto",
+   "destination": "/overnight-camp",
+   "permanent": true
+  }
+ ],
+ "headers": [
+  {
+   "source": "/Assets/(.*)",
+   "headers": [
+    {
+     "key": "Cache-Control",
+     "value": "public, max-age=31536000, immutable"
+    }
+   ]
+  },
+  {
+   "source": "/(.*)",
+   "headers": [
+    {
+     "key": "X-Content-Type-Options",
+     "value": "nosniff"
+    },
+    {
+     "key": "Referrer-Policy",
+     "value": "strict-origin-when-cross-origin"
+    },
+    {
+     "key": "Permissions-Policy",
+     "value": "camera=(), microphone=(), geolocation=()"
+    },
+    {
+     "key": "Strict-Transport-Security",
+     "value": "max-age=31536000"
+    },
+    {
+     "key": "Content-Security-Policy",
+     "value": "default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'self' https://tagassistant.google.com; img-src 'self' data: https://i.ytimg.com https://www.google.com https://www.google.ca https://googleads.g.doubleclick.net https://stats.g.doubleclick.net https://www.googletagmanager.com; media-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net; connect-src 'self' https://book.campcookstown.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.doubleclick.net https://www.google.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://td.doubleclick.net https://tagassistant.google.com"
+    }
+   ]
+  },
+  {
+   "source": "/(.*)",
+   "has": [
+    {
+     "type": "host",
+     "value": ".*\\.vercel\\.app"
+    }
+   ],
+   "headers": [
+    {
+     "key": "X-Robots-Tag",
+     "value": "noindex, nofollow"
+    }
+   ]
+  }
+ ]
+}
