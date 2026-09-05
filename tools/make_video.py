@@ -98,26 +98,30 @@ def probe_duration(path):
     return float(out)
 
 
-def full(w, h, base, crf, maxrate, poster):
-    """The whole 36 second film, uncut, opening on the rainbow, as a loop.
+def full(w, h, base, crf, maxrate, poster, start=SCENES['field'][0]):
+    """The whole 36 second film, uncut, as a seamless loop that opens on the pack in the field.
 
-    The master is scaled once (title text on the opening shot removed). The last half second is crossfaded into
-    the opening shot, so the loop returns to the rainbow through a fade rather than a cut; the opening shot is a
-    slow pan, so the half second it then steps back is invisible."""
+    The master is scaled once (title text on the opening shot removed). The film is then rotated to begin at
+    `start`: the part from `start` to the end plays first, its last half second dissolves into the opening
+    rainbow shot, and the film runs on to `start` again, so the last frame is the first frame. Nothing is cut."""
     inter = os.path.join(TMP, f'full-{w}x{h}.mp4')
     if not os.path.exists(inter):
         run(['ffmpeg', '-v', 'error', '-y', '-i', SRC, '-vf', f"{DELOGO}:enable='between(t,0,2.75)',scale={w}:{h}:flags=lanczos,setsar=1,format=yuv420p",
              '-an', '-c:v', 'libx264', '-preset', 'fast', '-crf', '12', '-r', '30', '-threads', '2', inter])
     dur = probe_duration(inter)
-    head = os.path.join(TMP, f'full-head-{w}x{h}.mp4')
-    run(['ffmpeg', '-v', 'error', '-y', '-i', inter, '-t', f'{XF + 0.2:.3f}', '-an', '-c:v', 'libx264', '-preset', 'fast', '-crf', '12', '-r', '30', '-threads', '2', head])
+    a = os.path.join(TMP, f'full-a-{w}x{h}-{start:.2f}.mp4')
+    b = os.path.join(TMP, f'full-b-{w}x{h}-{start:.2f}.mp4')
+    run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start:.3f}', '-i', inter, '-an', '-c:v', 'libx264', '-preset', 'fast', '-crf', '12', '-r', '30', '-threads', '2', a])
+    run(['ffmpeg', '-v', 'error', '-y', '-i', inter, '-t', f'{start + XF:.3f}', '-an', '-c:v', 'libx264', '-preset', 'fast', '-crf', '12', '-r', '30', '-threads', '2', b])
+    la = probe_duration(a)
     mp4 = os.path.join(OUT, base + '.mp4')
-    fc = f'[0:v][1:v]xfade=transition=fade:duration={XF}:offset={dur - XF:.3f}[vout]'
-    run(['ffmpeg', '-v', 'error', '-y', '-i', inter, '-i', head, '-filter_complex', fc, '-map', '[vout]', '-t', f'{dur:.3f}',
+    fc = f'[0:v][1:v]xfade=transition=fade:duration={XF}:offset={la - XF:.3f}[vout]'
+    total = la - XF + start  # ends on the frame it started on
+    run(['ffmpeg', '-v', 'error', '-y', '-i', a, '-i', b, '-filter_complex', fc, '-map', '[vout]', '-t', f'{total:.3f}',
          '-an', '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-crf', str(crf), '-maxrate', maxrate, '-bufsize', '4M',
          '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-r', '30', '-threads', '2', mp4])
     run(['ffmpeg', '-v', 'error', '-y', '-i', mp4, '-frames:v', '1', '-q:v', '3', os.path.join(OUT, poster)])
-    print('full', base, 'bytes', os.path.getsize(mp4), 'duration about', round(dur, 2)); sys.stdout.flush()
+    print('full', base, 'bytes', os.path.getsize(mp4), 'duration about', round(total, 2)); sys.stdout.flush()
 
 
 def pane(order, base, w, h, crf, maxrate, poster=None):
